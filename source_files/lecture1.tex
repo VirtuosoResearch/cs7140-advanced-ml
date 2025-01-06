@@ -96,13 +96,37 @@ where the randomness is on the training data samples drawn from $\bP^{\star}$.
 
 Equipped with such a statement, we will then apply the statement to the empirical risk minimizer $\hat h_{\erm}$, since the result essentially holds for any $h \in \cH$, which also subsumes $\hat h_{\erm}$ as a special case.
 
-\subsection{Basic setup of deep networks}
+\subsection{Basic setup of neural networks}
 
+Consider the case of a basic one-layer network:
+\begin{align}\label{eq_xmap}
+    x \rightarrow \sum_{i=1}^m a_i \sigma(w_i^{\top} x + b_i), \text{ where }
+\end{align}
+\begin{itemize}
+    \item $\sigma$ is the nonlinear activation function. Typical choices of $\sigma$: ReLU $x\rightarrow\max(0, x)$, sigmoid $x \rightarrow \frac 1 {1 + \exp(-x)}$
+    
+    \item $Z = \set{\alpha = (a_i, w_i, b_i)}_{i=1}^m$ are trainable parameters of the network. By varying them we could define the function class $\cH$ as
+    \[ \cH = \set{f_{\alpha} : \forall \alpha \in Z} \]
+    
+    \item $\cH$ essentially represents a set of one-hidden-layer neural networks with $m$ neurons
 
+    \item We can define the weight matrix $W = [w_1, w_2, \dots, w_m]$, and the bias vector $b = [b_1, b_2, \dots, b_m]$. Thus, we may write map \eqref{eq_xmap} as $x\rightarrow a^{\top} \sigma(W x + b)$.
+\end{itemize}
 
+By extending the above setup, we may write a deep network as
+\begin{align}
+    f_{\alpha}(x) = \sigma_L\left( W_L \sigma_{L-1} \left( \cdots \sigma_2 \left(W_2 \sigma_1 \left( W_1 x + b_1 \right) + b_2 \right) \cdots \right) \right)
+\end{align}
+The depth of the network is given by $L$.
+The width is given by $\max(m_1, m_2, \dots, m_l)$, i.e., the layer with the most neurons in the layer.
+
+Motivating questions: \emph{How could we analyze the training and test losses of a deep network?} \emph{How well does a deep network generalize, and how does it depend on its depth and width?}
+\emph{How does this ability to learn and to generalize rely on the data distributions, and what is the role of optimization algorithms used to train the network?}
 
 \subsection{Next lecture}
 
+In the next lecture, we will wrap up this overview by giving a setup about how to rigorously model transfer learning, and reason about estimation procedures whose test data is different from the training data.
+Then, we will dive deeper into the uniform convergence framework.
 
 \paragraph{P.S.} 
 \begin{itemize}
