@@ -1,0 +1,199 @@
+%% pkg
+\usepackage{lipsum}
+\usepackage{mathtools}
+\usepackage{bm}
+\usepackage{enumitem}
+\let\openbox\relax
+\let\Bbbk\relax
+
+%% alg
+\newcommand{\dpsgd}{{\sc DP-SGD$_{\star}$}}
+
+%% pkg
+\usepackage{amssymb,mathrsfs}
+\usepackage[dvipsnames]{xcolor}
+
+\usepackage{tikz}
+\usetikzlibrary{positioning}
+\definecolor{DarkGreen}{rgb}{0.2,0.6,0.2}
+\definecolor{DarkRed}{rgb}{0.9,0.2,0.2}
+\definecolor{DarkBlue}{rgb}{0.2,0.2,0.9}
+\definecolor{DarkPurple}{rgb}{0.4,0.2,0.4}
+\definecolor{paynesgrey}{rgb}{0.25, 0.25, 0.28}
+
+%\usepackage{caption}
+% alg
+%\algnewcommand\algorithmicinput{\textbf{Input:}}
+%\algnewcommand\Input{\item[\algorithmicinput]}
+%\algnewcommand\algorithmicoutput{\textbf{Output:}}
+%\algnewcommand\Output{\item[\algorithmicoutput]}
+%\algnewcommand\algorithmicinput{\textbf{Input:}}
+%\algnewcommand\Param{\item[\textbf{Parameter:}]}
+%\algnewcommand\Req{\item[\textbf{Require:}]}
+
+
+
+%% new cmd
+\ifnum \shownotes = 1
+	\newcommand{\authnote}[2]{{$\ll$\textsf{\footnotesize #1 notes: #2}$\gg$}}
+\else
+	\newcommand{\authnote}[2]{}
+\fi
+%\newcommand{\todo}[1]{\textcolor{red}{[TODO: #1]}}
+\newcommand{\hl}[1]{\textcolor{red}{#1}}
+\newcommand{\HZ}[1]{\textcolor{magenta}{\authnote{HZ}{#1}}}
+\newcommand{\DL}[1]{\textcolor{red}{\authnote{DL}{#1}}}
+\newcommand{\HJ}[1]{\textcolor{blue}{\authnote{HJ}{#1}}}
+\newcommand{\ZZ}[1]{\textcolor{orange}{\authnote{ZZ}{#1}}}
+
+
+%% new environment
+\newenvironment{proofof}[1]{\smallskip\noindent{\bf Proof of #1~~~}} {\hspace*{\fill}\par}
+
+%% thm environment
+%\newtheorem{theorem}{Theorem}[section]
+%\newtheorem{lemma}[theorem]{Lemma}
+%\newtheorem{proposition}[theorem]{Proposition}
+%\newtheorem{claim}[section]{Claim}
+%\newtheorem{corollary}[theorem]{Corollary}
+%\newtheorem{definition}[theorem]{Definition}
+%\newtheorem{fact}[section]{Fact}
+%\newtheorem{restate}[theorem]{Theorem}
+%\newtheorem{conjecture}[theorem]{Conjecture}
+%\newtheorem{assumption}[theorem]{Assumption}
+%\newtheorem{example}[theorem]{Example}
+%\newtheorem{question}[theorem]{Question}
+%\newtheorem{remark}[theorem]{Remark}
+
+
+\newcommand{\squishlist}{
+ \begin{list}{$\bullet$}
+  { \setlength{\itemsep}{0pt}
+    \setlength{\parsep}{2pt}
+    \setlength{\topsep}{2pt}
+    \setlength{\partopsep}{0pt}
+    \setlength{\itemindent}{2pt}
+    \setlength{\leftmargin}{0.5cm}
+    % \setlength{\labelwidth}{1em}
+  }
+}
+\newcommand{\squishend}{\end{list}}
+
+%% operator
+% set, eq
+%\newcommand{\set}[1]{\{#1\}}
+\newcommand{\bigset}[1]{\big\{ #1 \big\}}
+\newcommand{\bigbrace}[1]{\big({#1}\big)}
+\newcommand{\Bigbrace}[1]{\Big({#1}\Big)}
+\newcommand{\Biggbrace}[1]{\Bigg({#1}\Bigg)}
+\newcommand{\fullbrace}[1]{\left({#1}\right)}
+\newcommand{\bigbracket}[1]{\big[{#1}\big]}
+\newcommand{\fullbracket}[1]{\left[{#1}\right]}
+\newcommand{\abs}[1]{\left\lvert#1\right\rvert}
+\newcommand{\set}[1]{\left\{#1\right\}}
+\newcommand{\size}[1]{\left\lvert#1\right\rvert}
+\newcommand{\bigabs}[1]{{\left| {#1} \right|}}
+\newcommand{\floor}[1]{\lfloor#1\rfloor}
+\newcommand{\ceil}[1]{\lceil#1\rceil}
+\newcommand{\ex}[1]{\mathop{\mathbb{E}}\left[ #1 \right]}
+\newcommand{\exarg}[2]{\mathop{\mathbb{E}}_{#1}\left[ #2 \right]}
+\newcommand{\inner}[2]{\langle #1, #2 \rangle}
+\newcommand{\biginner}[2]{\left\langle #1, #2 \right\rangle}
+\newcommand{\Bracket}[1]{\left(#1\right)}
+\newcommand{\bigo}[1]{\mathop{\textup{O}\left(#1\right)}}
+\newcommand{\Var}[1]{\mathop{\textup{Var}}\left[ #1 \right]}
+\newcommand{\define}{:=}
+
+% matrix
+\newcommand{\norm}[1]{\|#1\|}
+\newcommand{\bignorm}[1]{\left\| #1 \right\|}
+\newcommand{\gematrix}{\succcurlyeq}
+\newcommand{\zeroMatrix}{\mathbf{0}}
+\newcommand{\vecone}{\mathbf{1}}
+\DeclareMathOperator{\id}{Id}
+\DeclareMathOperator{\tr}{Tr}
+\newcommand{\bigtr}[1]{\tr\left[#1\right]}
+\DeclareMathOperator{\diago}{\textup{diag}}
+\newcommand{\diag}[1]{\diago\left(#1\right)}
+\DeclareMathOperator{\offdiago}{\textup{off-diag}}
+\newcommand{\offdiag}[1]{\offdiago\left(#1\right)}
+%\DeclareMathOperator*{\argmax}{arg\,max}
+\newcommand{\normFro}[1]{\norm{#1}_{_{F}}}
+\newcommand{\norms}[1]{\norm{#1}_{_{2}}}
+\newcommand{\normNuclear}[1]{\norm{#1}_{*}}
+\newcommand{\bignormFro}[1]{\bignorm{#1}_{F}}
+\newcommand{\bignorms}[1]{\bignorm{#1}_{2}}
+\newcommand{\bignormnuc}[1]{\bignorm{#1}_{\star}}
+
+%symbol OP
+\newcommand{\SAM}{\textup{SAM}}
+\newcommand{\OLS}{\textup{OLS}}
+\newcommand{\real}{\mathbb{R}}
+\newcommand{\tensor}{\mathscr{T}}
+\newcommand{\Matrix}{\mathscr{M}}
+\newcommand{\rank}{\textup{rank}}
+\newcommand{\sdp}{\text{SDP}}
+\newcommand{\dimMatrix}[1]{\real^{#1}}
+\newcommand{\dimension}{\textup{dim}}
+\newcommand{\dimThree}{\real^{d \times d \times d}}
+\newcommand{\dimTwo}{\real^{d \times d}}
+\newcommand{\poly}{\textup{poly}}
+\newcommand{\nullS}[1]{\textup{null}(#1)}
+\newcommand{\Int}{\mathbb{Z}}
+\newcommand{\relu}{\textup{ReLU}}
+\newcommand{\svd}{\textup{SVD}}
+\newcommand{\test}{\textup{test}}
+\newcommand{\aug}{\textup{aug}}
+\newcommand{\mixup}{\textup{mixup}}
+\newcommand{\unif}{\textup{unif}}
+\newcommand{\compose}{\textup{compose}}
+\newcommand{\opt}{\textup{opt}}
+\newcommand{\row}{\textup{row}}
+\newcommand{\colspan}{\textup{span}}
+\newcommand{\TE}{\textup{TE}}
+\newcommand{\bias}{\textup{bias}}
+\newcommand{\var}{\textup{var}}
+\newcommand{\KL}{\textup{KL}}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\newcommand{\vect}[1]{{\bm{\mathrm{vec}}}(#1)}
+\newcommand{\erm}{\textup{ERM}}
+
+
+\newcommand{\bJ}{\mathbf{J}}
+\newcommand{\bH}{\mathbf{H}}
+\newcommand{\sH}{\mathscr{H}}
+\newcommand{\cA}{\mathcal{A}}
+\newcommand{\cD}{\mathcal{D}}
+\newcommand{\cE}{\mathcal{E}}
+\newcommand{\cale}{\mathcal{e}}
+\newcommand{\cG}{\mathcal{G}}
+\newcommand{\cS}{\mathcal{S}}
+\newcommand{\cX}{\mathcal{X}}
+\newcommand{\cZ}{\mathcal{Z}}
+\newcommand{\cH}{\mathcal{H}}
+\newcommand{\cF}{\mathcal{F}}
+\newcommand{\cI}{\mathcal{I}}
+\newcommand{\cL}{\mathcal{L}}
+\newcommand{\bN}{\mathbb{N}}
+\newcommand{\bP}{\mathbb{P}}
+
+
+\newcommand{\cN}{\mathcal{N}}
+\newcommand{\cO}{\mathcal{O}}
+\newcommand{\cP}{\mathcal{P}}
+\newcommand{\cQ}{\mathcal{Q}}
+\newcommand{\cR}{\mathcal{R}}
+\newcommand{\cT}{\mathcal{T}}
+\newcommand{\cU}{\mathcal{U}}
+\newcommand{\cW}{\mathcal{W}}
+\newcommand{\cY}{\mathcal{Y}}
+\newcommand{\ind}[1]{\mathbbm{1}{\{#1\}}}
+\newcommand{\primal}{\text{Primal}}
+\newcommand{\dual}{\text{Dual}}
+\newcommand{\full}{\text{full}}
+\newcommand{\feasible}{\text{TensorFeasible}}
+\newcommand{\proj}{P}
+%\newcommand{\bigo}[1]{O\left(#1\right)}
+\newcommand{\adv}{\textup{adv}}
+\newcommand{\nso}{\textup{NSO}}
+\newcommand{\integer}{\mathbb{N}}
