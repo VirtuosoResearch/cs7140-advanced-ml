@@ -16,7 +16,7 @@
             labeldateparts=true,
             sortcites=true,
             backref=true]{biblatex}
-\addbibresource{../bibliography/ref.bib}
+\addbibresource{ref.bib}
 %\renewcommand{\cite}[1]{\citep{#1}}
 \usepackage[hidelinks,breaklinks=true]{hyperref}
 \hypersetup{colorlinks=true,linkcolor={red},citecolor={blue},urlcolor={red}}
@@ -98,7 +98,13 @@
 \date{\today}
 \maketitle
 
-\input{lecture1}
-
+\input{overview}
+%\newpage
+\input{uniform_convergence}
+%\input{ps}
+\newpage
+\begin{refcontext}[sorting=nyt]
+\printbibliography
+\end{refcontext}
 
 \end{document}

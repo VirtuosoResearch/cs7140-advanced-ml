@@ -1,0 +1,140 @@
+\section{Uniform convergence and generalization}
+
+Recall that we have introduced the empirical risk and the expected risk of a hypothesis (denoted by $L(h)$ and $\hat L(h)$) for some $h$ in a hypothesis class $\cH$.
+Suppose we minimize the empirical risk to get $\hat h_{\erm}$. Two questions:
+\begin{itemize}
+    \item Generalization gap: how does the expected and empirical risks compare for ERM, i.e., $L(\hat h_{\erm}) - \hat L(\hat h_{\erm})$? This is called the \hl{generalization gap}.
+
+    \item Excess risk: how well does ERM do with respect to the best possible hypothesis in the hypothesis class, i.e., $L(\hat h_{\erm}) - \min_{h \in \cH} L(h)$?
+    This is also called the \hl{excess risk}.
+\end{itemize}
+
+A particularly fruitful framework for analyzing learning algorithms is the probably approximately correct (PAC) framework \citep{valiant1984theory}:
+
+\begin{mdframed}[
+    roundcorner=10pt,
+    leftmargin=0.1\textwidth,
+    rightmargin=0.1\textwidth]
+    A learning algorithm $A$ PAC learns a hypothesis class $\cH$ if
+    \begin{enumerate}[label=\alph*)]
+        \item For any distribution $\bP^{\star}$ supported over $\cX \times \cY$, and any $\epsilon > 0$, $\delta > 0$
+        \item Upon taking $n$ I.I.D. samples from $\bP^{\star}$, $A$ produces an output $\hat h \in \cH$ such that with probability at least $1 - \delta$ (over the randomness of the samples)
+        \[ L(\hat h) - \hat L(\hat h) \le \epsilon \]
+        \item Further, $A$ runs in time polynomial in $n, d, \epsilon^{-1}, \delta^{-1}$ (where $d$ is the dimension of the input)
+    \end{enumerate}
+\end{mdframed}
+
+\paragraph{Remark:} Notice that the running time complexity places a bound on the sample complexity as well. We will assume that the empirical risk minimizer can be computed efficiently.
+For instance, think of a large neural network whose training loss can be efficiently reduced to reach zero using stochastic gradient descent
+
+\subsection{Learning a realizable, finite hypothesis class (Lecture 2)}
+
+The ERM framework is very general -- we now give a concrete example to illustrate some basic results.
+
+\paragraph{Assumptions (realizable, finite hypothesis):}
+i) The size of the hypothesis space, $\cH$, is finite;
+ii) There exists a hypothesis $h^{\star} \in \cH$ such that $h^{\star}$ achieves perfect performance, i.e., $L(h^{\star}) = \exarg{(x, y) \in \bP^{\star}}{\ell( h^{\star}(x), y )} = 0$.
+
+Under these assumptions, we shall prove the following property of ERM:
+
+\begin{mdframed}[
+    roundcorner=10pt,
+    leftmargin=0.1\textwidth,
+    rightmargin=0.1\textwidth]
+    Under the above assumptions, with probability $1 - \delta$,
+    \[ L(\hat h_{\erm}) \le \frac {\log(\abs{\cH}) + \log(\delta^{-1})} {n} \]
+\end{mdframed}
+
+In particular, to reduce the expected risk below $\epsilon$, we want $n \ge \frac {\log(\abs{\cH} + \log(\delta^{-1}))} {\epsilon}$.
+Remarks:
+\begin{itemize}
+    \item The excess risk only grows logarithmically with the size of the hypothesis class, so we affort to use an exponentially large hypothesis space.
+
+    \item The result is independent of $\bP^{\star}$. This is nice because typically we don’t know the true distribution.
+\end{itemize}
+
+\begin{proof}
+    We’d like to upper bound the probability of the bad event that $L(\hat h_{\erm}) > \epsilon$:
+    \begin{enumerate}[label=\alph*)]
+        \item Let $B \subseteq \cH$ be the set of bad hypotheses: $\set{B \in \cH : L(h) > \epsilon}$
+
+        \item We can rewrite our goal as upper bounding the probability of selecting a bad hypothesis $\Pr[L(\hat h_{\erm}) > \epsilon] = \Pr[\hat h_{\erm} \in B]$
+
+        \item Recall the empirical risk of ERM is always zero because at least $\hat L(h^{\star}) = 0$
+
+        \item Hence for any “bad” hypothesis in $B$, they must have zero empirical risk
+        \[ \Pr[\hat h_{\erm} \in B] \le \Pr[\exists h \in B : \hat L(h) = 0] \]
+
+        \item Now we shall deal with the above in two steps.
+        First, bound $\Pr[ \hat L(h) = 0 ]$ for a fixed $h \in B$.
+
+        Notice that on a random example from $\cP^{\star}$, the accuracy of $h$ should be $1 - L(h)$.
+        Since the training data is drawn IID from $\cP^{\star}$, and $L(h) \ge \epsilon$ for any $h \in B$, we get that
+        \[ \Pr[ \hat L(h) = 0 ] \le (1 - L(h))^{n} \le (1 - \epsilon)^n \le \exp^{-\epsilon n},  \]
+        where we use the fact that $1 - x \le \exp(-x)$.
+
+        \item Second, we want the above to hold simultaneously for all $h \in B$.
+        We can apply the union bound to bound the probability of all bad events:
+        \begin{align*} 
+            \Pr[\exists h \in B : \hat L(h) = 0] &\le \sum_{h \in B} \Pr[ \hat L(h) = 0 ] \\
+            & \le \abs{B} \exp(- \epsilon n) \\
+            & \le \abs{\cH} \exp( - \epsilon n)
+        \end{align*}
+        By setting the above at most $\delta$, we conclude that $\epsilon$ must be at least $\frac {\log(\abs{\cH}) + \log(\delta^{-1}) } n$.
+    \end{enumerate}
+    This concludes the proof for learning finite, realizable hypothesis spaces.
+\end{proof}
+
+\paragraph{Takeaway:}
+The proof of this result is elementary but illustrates an important pattern that will recur in more complex scenarios
+We are interested in the expected risk, but only have access to empirical risk to choose the ERM:
+\begin{itemize}
+    \item Step 1 (convergence): for a fixed $h$, show that $\hat L(h)$ is close to $L(h)$ with high probability
+    \item Step 2 (uniform convergence): show that the above holds simultaneously for all hypotheses $h \in \cH$
+\end{itemize}
+However, the assumptions are restrictive.
+There exists a perfect hypothesis (realizability). What happens when the problem is not realizable? To answer this, we introduce the tools of concentration estimates.
+
+Second, the hypothesis class is finite. What happens when the number of hypotheses is infinite?
+To answer this, we need better ways of measuring the ``size'' of a set -- leading to Rademacher complexity, VC, PAC-Bayes, etc.
+
+
+\subsection{Using uniform convergence to reason about generalization (Lecture 2)}
+
+We now give a high-level picture of the logic behind how we can use uniform convergence to reason about generalization (in the context of ERM).
+We’d like to show that ERM’s excess risk is small:
+\begin{align}
+    \Pr\left[ L(\hat h_{\erm} - \hat L(\hat h_{\erm}) \ge \epsilon \right] \le \delta
+\end{align}
+We can expand the excess risk as
+\begin{align}
+    L(\hat h) - L(h^{\star}) = \underbrace{\left(L(\hat h) - \hat L(\hat h) \right)}_{\text{Uniform convergence}} + \underbrace{\left( \hat L(\hat h) - \hat L(h^{\star}) \right)}_{\le 0} + \underbrace{\left( \hat L(h^{\star} )- L(h^{\star}) \right)}_{\text{Concentration}} 
+\end{align}
+We'll see how concentration estimates can be used to control this difference in the third part.
+However, the same reasoning does not apply to the first part because the ERM $\hat h_{\erm}$ depends on the training examples $\hat L$.
+In particular,
+\begin{align}
+    \hat L(\hat h_{\erm}) = \frac 1 n\sum_{i=1}^n \ell( \hat h_{\erm}(x_i), y_i ).
+\end{align}
+Due to the correlation, the above is not a sum of independent random variables.
+The central thesis of uniform convergence is that if we could ensure that $L(h)$ and $\hat L(h)$ are close for all $h\in\cH$, then $L(\hat h_{\erm})$ must be close to $\hat L(\hat h_{\erm})$ as well.
+
+In summary, our goal of deriving a uniform convergence result can be stated as
+\begin{align}
+    \Pr[L(\hat h_{\erm}) - L(h_{\star}) \ge \epsilon]
+    \le \Pr\left[ \left(\sup_{h \in \cH} \abs{L(h) - \hat L(h)} \right) \ge \frac {\epsilon} 2 \right]
+    \le \delta
+\end{align}
+In particular, the $1/2$ above comes from combining the error terms from the first and third parts together.
+Put it in words, we'd like to upper bound the probability that the largest difference between the empirical risk and the expected risk is larger than $\epsilon /2$.
+
+\paragraph{Next lecture:}
+We'll talk about concentration estimates, which form the most fundamental techniques for dealing with IID random variables.
+Then we'll talk about a generalization bound for finite (not necessarily realizable) hypothesis classes.
+Suggested reading: Chapter 3.1-3.3 of Statistical learning theory lecture notes by Percy Liang.
+
+
+%\subsection{Concentration estimates (Lecture 2)}
+
+
+
