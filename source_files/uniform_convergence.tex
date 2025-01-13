@@ -137,6 +137,8 @@ Put it in words, we'd like to upper bound the probability that the largest diffe
 \subsection{Concentration estimates (Lecture 3)}
 
 \hl{Concentration inequalities} are powerful tools from probability theory that show the average of independent random variables will be concentrated around its expectation.
+Concentration estimates are the basis of a large branch of learning theory \citep{bach2024learning} and high-dimensional statistics \citep{wainwright2019high}.
+They are one of the most basic tools for studying supervised learning algorithms and models \citep{zhang2023mathematical}, primarily because much of supervised learning deals with in-distribution samples.
 
 \paragraph{Example (mean estimation):}
 Let $X_1, X_2, \dots, X_n$ be independent and identically distributed random variables with mean $\mu = \ex{X_i}$, for all $i = 1, 2, \dots, n$.
@@ -189,7 +191,7 @@ Then, for any $\epsilon \in (0, 1)$, we have
 \[ \Pr\left[ \bigabs{\hat\mu_n - \mu} > \epsilon \right] \le 2\exp(-2\epsilon^2 n) \]
 
 The Hoeffding's inequality is a very powerful result when we work with the average of $n$ random variables.
-Variants of this inequality are also called Chernoff bound.\footnote{\url{https://en.wikipedia.org/wiki/Chernoff_bound}}
+Variants of this inequality (which is restricted to bounded random variables) are also called Chernoff bound.\footnote{\url{https://en.wikipedia.org/wiki/Chernoff_bound}}
 Next, we shall see a proof through the use of moment generating functions (MGF).
 
 \paragraph{Definition (Moment generating function):}
@@ -270,7 +272,14 @@ Applying the Chernoff bound, we have
 This demonstrates that the concentration of the number of heads around the mean $n/2$ is very tight.
 Most of the time, the deviations from the mean are on the order of $O(\sqrt {n \ln n})$.
 
-\subsubsection{Gaussian random variables}
+\paragraph{Other use cases of Chernoff bound:}
+\begin{itemize}
+    \item Suppose we are interested in evaluating the probability that a particular gene mutation occurs in the population.
+    Given a DNA sample, a lab test can determine if it carries the mutation.
+    However, the lab test is expensive and and we would like to obtain a relatively reliable estimate from a small number of tests.
+\end{itemize}
+
+\subsubsection{Example: Gaussian random variables}
 
 In the next example, we look at the MGF of Gaussian random variables.
 Let $X \sim \cN(0, \sigma^2)$. Then, $M_X(t) = e^{\sigma^2 t^2 / 2}$.
