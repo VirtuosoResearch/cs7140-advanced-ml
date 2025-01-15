@@ -42,7 +42,7 @@ Under these assumptions, we shall prove the following property of ERM:
     leftmargin=0.1\textwidth,
     rightmargin=0.1\textwidth]
     Under the above assumptions, with probability $1 - \delta$,
-    \[ L(\hat h_{\erm}) \le \frac {\log(\abs{\cH}) + \log(\delta^{-1})} {n} \]
+    \begin{align}\label{eq_realizable} L(\hat h_{\erm}) \le \frac {\log(\abs{\cH}) + \log(\delta^{-1})} {n} \end{align}
 \end{mdframed}
 
 In particular, to reduce the expected risk below $\epsilon$, we want $n \ge \frac {\log(\abs{\cH}) + \log(\delta^{-1})} {\epsilon}$.
@@ -104,7 +104,7 @@ To answer this, we need better ways of measuring the ``size'' of a set -- leadin
 We now give a high-level picture of the logic behind how we can use uniform convergence to reason about generalization (in the context of ERM).
 We’d like to show that ERM’s excess risk is small:
 \begin{align}
-    \Pr\left[ L(\hat h_{\erm}) - \hat L(\hat h_{\erm}) \ge \epsilon \right] \le \delta
+    \Pr\left[ L(\hat h_{\erm}) - L(h^{\star}) \ge \epsilon \right] \le \delta
 \end{align}
 We can expand the excess risk as
 \begin{align}
@@ -229,19 +229,19 @@ Let $X = \sum_{i=1}^n X_i$, and let
 \[ \mu = \ex{X} = \ex{\sum_{i=1}^n X_i} = \sum_{i=1}^n \ex{X_i} = \sum_{i=1}^n p_i \]
 
 For a given $\delta > 0$, we are interested in bounds on $\Pr[X \ge (1 + \delta) \mu]$ and $\Pr[X \le (1 - \delta) \mu]$, that is, the probability that $X$ deviates from its expectation $\mu$ by $\delta \mu$ or more.
-To develop a Chernoff bound we need to compute the moment generating function of $X$.
+To develop a Chernoff bound, we need to compute the moment generating function of $X$.
 We start with the MGF of each $X_i$:
 \begin{align*}
     M_{X_i} (t) = \ex{e^{t X_i}} = p_i e^t + (1 - p_i) &= 1 + p_i (e^t - 1) \\
     &\le e^{p_i(e^t - 1)},
 \end{align*}
-where in the last step we have used the fact that, for any $y$, $1 + y \le e^y$.
+where in the last step, we have used the fact that, for any $y$, $1 + y \le e^y$.
 Since the $X_i$'s are independent from each other, we take the product of the $n$ MGF to obtain
 \begin{align*}
     M_X(t) = \prod_{i=1}^n M_{X_i}(t) &\le \prod_{i=1}^n e^{p_i(e^t - 1)} \\
     &= \exp\left(\sum_{i=1}^n p_i (e^t - 1) \right) = e^{(e^t - 1) \mu}
 \end{align*}
-Based on this result, we now apply Markov's inequality: for any $t > 0$ we have
+Based on this result, we now apply Markov's inequality: for any $t > 0$, we have
 \begin{align*}
     \Pr[X \ge (1 + \delta) \mu] &= \Pr[e^{tX} \ge e^{t(1 + \delta) \mu}] \\
     &\le \frac {\ex{e^{tX}}} {e^{t(1 + \delta) \mu}} \\
@@ -258,7 +258,7 @@ Computing the derivatives of $f(\delta)$, we have:
     f'(\delta) = 1 - \frac {1 + \delta}{1 + \delta} - \ln(1 + \delta) + \frac {2 \delta} 3\\
     f''(\delta) = - \frac 1 {1 + \delta} + \frac 2 3
 \end{align*}
-We see that the second derivative is less than zero if $\delta < 1/2$ and it is positive otherwise.
+We see that the second derivative is less than zero if $\delta < 1/2$, and it is positive otherwise.
 Hence, $f'(\delta)$ first decreases and then increases in the interval $[0, 1]$.
 Since $f'(0) = 0$ and $f'(1) < 0$, we conclude that $f'(\delta) \le 0$ in the interval $[0, 1]$.
 Since $f(0) = 0$, it follows that $f(\delta) \le 0$, which shows that for any $\delta$ between $0$ and $1$, we have
@@ -276,7 +276,7 @@ Most of the time, the deviations from the mean are on the order of $O(\sqrt {n \
 \begin{itemize}
     \item Suppose we are interested in evaluating the probability that a particular gene mutation occurs in the population.
     Given a DNA sample, a lab test can determine if it carries the mutation.
-    However, the lab test is expensive and and we would like to obtain a relatively reliable estimate from a small number of tests.
+    However, the lab test is expensive and we would like to obtain a relatively reliable estimate from a small number of tests.
 \end{itemize}
 
 \subsubsection{Example: Gaussian random variables}
@@ -306,4 +306,176 @@ This motivates the following definition.
 \end{align}
 It follows that for sub-Gaussian $X$, we again have that $\Pr[X \ge \epsilon] \le \exp(-\epsilon^2 /(2\sigma^2))$.
 
-\paragraph{Next lecture:} Based on the concentration estimates we have established, next time we'll talk about how to get a generalization bound for learning finite hypothesis classes. We'll then start to talk about the Rademacher complexity, which is perhaps the most fundamental tool for deriving generalization bounds. {\bf Suggested readings:} Chapter 3.5 of \cite{liang2016cs229t}, and Chapter 3 of \cite{mitzenmacher2017probability}.
+%\paragraph{Next lecture:} Based on the concentration estimates we have established, next time we'll talk about how to get a generalization bound for learning finite hypothesis classes. We'll then start to talk about the Rademacher complexity, which is perhaps the most fundamental tool for deriving generalization bounds. {\bf Suggested readings:} Chapter 3.5 of \cite{liang2016cs229t}, and Chapter 3 of \cite{mitzenmacher2017probability}.
+
+\subsection{Learning finite hypothesis space (Lecture 4)}
+
+Recall from last lecture that we developed the Hoeffding's inequality.
+Next we use this result to bound the excess risk of learning a finite hypothesis class (without the realizable condition).
+
+\paragraph{Learning finite hypothesis classes:}
+Let $\cH$ be a finite hypothesis class. Let $\ell$ be the zero-one loss function: $\ell(h(x), y) = \mathbbm{1}_{h(x) \neq y}$.
+Suppose we minimize the empirical risk to get the minimizer $\hat h\in\cH$.
+Then, with probability at least $1 - \delta$ over the randomness of training samples, the excess risk must be bounded by
+\begin{align} L(\hat h) - L(h^{\star}) \le \sqrt{\frac {2(\log(\abs{\cH}) + \log(2\delta^{-1}))} n } \label{eq_finite_real} \end{align}
+We can contrast this result with \eqref{eq_realizable} (of learning finite, realizable hypothesis space).
+The difference is that we now get a slower convergence rate ($n^{-1}$ to $n^{-1/2}$).
+
+\paragraph{Proof:} Recall that the excess risk can be decomposed to
+\begin{align*}
+    L(\hat h_{\erm}) - L(h^{\star})
+    = L(\hat h_{\erm}) - \hat L(\hat h_{\erm}) + \underbrace{\hat L(\hat h_{\erm}) - \hat L(h^{\star})}_{\le 0} + \hat L(h^{\star}) - L(h^{\star})
+\end{align*}
+Notice that the second term is at most zero.
+Thus, we focus on the first and the third terms.
+\begin{itemize}
+    \item Use the Hoeffding’s inequality to deal with the third term.
+    
+    \item Apply uniform convergence to upper bound the first term by $\sup_{h\in\cH} \abs{L(h) - \hat L(h)}$ (Use the union bound).
+\end{itemize}
+
+\underline{Step 1:} bound $\Pr[L(h) - \hat L(h) \ge \epsilon]$ for a fixed $h \in \cH$.
+For a fixed $h \in \cH$, notice that $\hat L(h)$ is the averaged loss among $n$ IID samples.
+Each of the loss term is bounded between zero and one (with expectation equal to $L(h)$).
+Therefore, by Hoeffding's inequality,
+\[ \Pr\left[ \abs{L(h) - \hat L(h)} \ge \epsilon\right] \le 2\exp(-2n\epsilon^2) \]
+
+\underline{Step 2:} apply Step 1 uniformly over all possible $h \in \cH$.
+In particular, we can apply union bound over all the possible bad events to get
+\[ \Pr\left[ \sup_{h\in\cH} \abs{L(h) - \hat L(h)} \ge \epsilon \right] \le \abs{\cH} \cdot 2\exp(-2n\epsilon^2) = \delta \]
+By setting $\epsilon = \sqrt{\frac {2(\log\abs{\cH} + \log(2\delta^{-1}))} n }$, we can get the probability set to $\delta$.
+
+\paragraph{Remarks:} We have removed the realizable assumption by suffering a $\sqrt n$ factor in the generalization bound. The $\sqrt n$ factor arises from sampling noise.
+It makes sense that learning is faster when there is no noise.
+
+
+\subsection{Rademacher complexity (Lecture 4)}
+
+Both of our generalization bounds require finite hypothesis classes. What about infinite hypothesis classes?
+
+We can't directly apply the union bound to infinite hypothesis classes.
+Need a more sophisticated way to measure complexity of a hypothesis class.
+
+With Rademacher complexity, the key idea is \hl{symmetrization}. Along the way, we need an extension of the Hoeffding's inequality to some function of bounded random variables, which is known as McDiarmid's inequality.
+Let us first start by motivating why we need these tools.
+
+\subsubsection{Motivation}
+
+Recall that, within the uniform convergence framework, we want to get a statement of the following
+
+\begin{align}
+    \Pr\left[ L(\hat h) - L(h^{\star}) \ge \epsilon \right]
+    \le \Pr\left[ \sup_{h\in\cH} \abs{L(h) - \hat L(h)} \ge \frac{\epsilon} 2 \right] \le \delta
+\end{align}
+
+Since there are two cases here, let us denote
+
+\[ G_n \define \sup_{h\in\cH} L(h) - \hat L(h), \quad G'_n \define \sup_{h\in\cH} \hat L(h) - L(h) \]
+Then we have that
+\[ \Pr\left[\sup_{h\in\cH} \abs{L(h) - \hat L(h)} \ge \frac {\epsilon} 2 \right] 
+\le \Pr\left[G_n \ge \frac {\epsilon} 2 \right] + \Pr\left[G'_n \ge \frac {\epsilon} 2\right] \]
+Let us focus on the first case, since the second case will be similar.
+
+Now, our main object becomes $G_n$: This is a rather non-trivial function, because of taking the supremum over a sum of random variables.
+
+Hence, let’s look at its expectation first!
+Usually, when we encounter a complicated random variable, we start by examining its first moment, then second moment, and so on.
+
+\subsubsection{Defintion of Rademacher complexity}
+
+Our main object of interest is now $\ex{G_n} = \ex{\sup_{h\in\cH} (L(h) - \hat L(h))}$.
+Recall that $\hat L(h)$ is the empirical risk, and $L(h)$ is the expected risk.
+
+This quantity is still quite difficult because it depends on the expected risk, an expectation over the unknown data distribution.
+The key idea of symmetrization is to remove this expected risk term with a ``simpler'' term.
+
+\paragraph{Definition of Rademacher complexity:}
+Let us imagine $n$ data points $Z'_1 = (x'_1, y'_1), Z'_2 = (x'_2, y'_2), \dots, Z'_n = (x'_n, y'_n)$, sampled from the true data distribution.
+Then, clearly $L(h) = \ex{\hat L'(h)}$, where $\hat L'(h)$ is the empirical risk on this ``copy'' dataset.
+
+Hence,
+\begin{align*}
+    \ex{G_n} &= \exarg{Z_{1:n}}{\sup_{h\in\cH} (L(h) - \hat L(h))} \\
+    &= \exarg{Z_{1:n}}{\sup_{h \in\cH} \exarg{Z'_{1:n}} {\hat L'(h) - \hat L(h)} } \\
+    &= \exarg{Z_{1:n}} {\exarg{Z'_{1:n}} {\sup_{h \in \cH} (\hat L'(h) - \hat L(h)) }  }
+\end{align*}
+
+Let us remove the dependence on the copy dataset. To that end, we introduce IID Rademacher random variables $\sigma_1, \sigma_2, \dots, \sigma_n$ sampled uniformly from $\set{+1, -1}$.
+
+Notice that \[ \hat L'(h) - \hat L(h) = \sum_{i=1}^n (\ell(h(x'_i), y'_i) - \ell(h(x_i), y_i)), \]
+is symmetric around zero.
+Hence, multiplying each individual term by $\sigma_i$ does not change its distribution.
+Thus,
+\begin{align*}
+    \ex{G_n} &\le \exarg{Z_{1:n}, Z'_{1:n}}{\sup_{h \in \cH} (\hat L'(h) - \hat L(h))} \\
+    &= \exarg{Z_{1:n}, Z'_{1:n}, \sigma_{1:n}}{\sup_{h\in \cH} \sigma_i (\ell(h(x'_i), y'_i) - \ell(h(x_i), y_i))} \\
+    &\le 2 \exarg{Z_{1:n}, \sigma_{1:n}}{\sup_{h\in\cH}\frac 1 n \sum_{i=1}^n \sigma_i \ell(h(x_i), y_i)}
+\end{align*}
+The last line (without the factor of $2$) is the \hl{Rademacher complexity} of $\cH$.
+
+In summary, let $\cH$ be a hypothesis class consisting of a class of real-valued functions. Example: two-layer neural nets, linear models.
+Define the Rademacher complexity (or Rademacher average) of $\cH$ to be
+\[ R_n(\cH) \define \exarg{Z_{1:n}, \sigma_{1:n}}{\sup_{h\in\cH} \frac 1 n \sum_{i=1}^n \sigma_i \ell(h(x_i), y_i)}, \]
+where $Z_i = (x_i, y_i)$ is a random sample from the underlying data distribution, and $\sigma_i$ is sampled uniformly from $\set{+1, -1}$.
+
+\subsubsection{Generalization bounds based on Rademacher complexity}
+
+To see the power of the concept we just introduced, here is a very general statement where we can always rely on when we work with supervised learning algorithms and models. 
+
+\paragraph{Generalization bounds based on Rademacher complexity:}
+Define \[ \cA = \set{(x, y) \rightarrow \ell(h(x), y) : h \in \cH}\] to be the loss function composed with the hypothesis space.
+Let $\cR_n(\cA)$ denote the Rademacher complexity of the function class $\cA$.
+
+With probability at least $1 - \delta$,
+\begin{align} L(\hat h_{\erm}) - L(h^{\star}) \le 4 R_n(\cA) + \sqrt{\frac {2\log(2\delta^{-1})} n} \label{eq_rade_bound}\end{align}
+To be clear, recall that $\hat h_{\erm}$ is the empirical risk minimizer (ERM), $h^{\star}$ is the expected risk minimizer, and $n$ is the size of the training set.
+
+\paragraph{Proof sketch:}
+\begin{itemize}
+    \item Show that empirical Rademacher complexity is close to the expectation
+    \item Use McDiarmid's inequality, which is essentially a concentration result for functions of IID random variables. We'll introduce this tool shortly
+    \item Show that the Rademacher complexity upper bounds the excess risk. We've seen this logic from the motivation
+\end{itemize}
+In more detail, recall that $G_n = \sup_{h\in\cH} L(h) - \hat L(h)$.
+Our first claim is to show that $G_n$ is close to $\ex{G_n}$:
+\begin{align}
+    \Pr\left[ G_n \ge \ex{G_n} + \epsilon \right] \le \exp(-2n\epsilon^2)
+\end{align}
+This shows that $G_n$ is indeed close to its expectation plus a small error. Hence it suffices to upper bound its expectation.
+
+Our second claim is to show that $\ex{G_n}$ is upper bounded by the Rademacher complexity.
+\begin{align*}
+    \ex{G_n} \le 2R_n(\cA).
+\end{align*}
+We have already seen the proof of this claim.
+Combined together, we can derive \eqref{eq_rade_bound}.
+
+\subsubsection{Properties of Rademacher complexity}
+
+\paragraph{Boundedness:}
+\begin{align*}
+    R_n(\cH) \le \max_{h\in \cH} \max_{x, y} \ell(h(x), y)
+\end{align*}
+This only shows that the Rademacher complexity is bounded by some constant. Usually, we'd like to show it goes to zero as $n$ goes to infinity.
+
+\paragraph{Monotonicity:} If $\cH_1 \subseteq \cH_2$, then $R_n(\cH_1) \le R_n(\cH_2)$.
+
+This is because we now take the supreme over a larger set, hence $R_n$ increases.
+
+\paragraph{Scaling:} $R_n(c\cdot \cH) = c\cdot R_n(\cH)$.
+
+\paragraph{Lipschitz composition:} Suppose $\phi$ is a Lipschitz-continuous, bounded by some constant $c_{\phi}$. Recall a function is Lipschitz-continuous if changing $x$ only changes the function value by $c_{\phi}$ times.
+
+Let $\phi \circ \cH =  \set{(x, y) \rightarrow \phi(h(x), y) : h \in \cH}$, i.e., compose $\phi$ with $h$.
+Then, we have that \[ R_n(\phi \circ \cH) \le c_{\phi} \cdot R_n(\cH). \]
+
+The proof requires going through the definition carefully.
+This property is useful because we can start by studying a simpler hypothesis class, and then compose more functions with the class without going through the calculation again
+
+\paragraph{Next lecture:} more examples of the Rademacher complexity, plus completing the proof. {\bf Suggested readings:} Chapter 3.8 of \cite{liang2016cs229t}.
+
+
+
+%\subsubsection{More about concentration estimates}
+
+
