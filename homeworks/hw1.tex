@@ -1,0 +1,137 @@
+\documentclass[11pt]{article}
+\usepackage{latexsym}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{epsfig}
+\def\shownotes{1}
+\usepackage{source_files/macro}
+\usepackage{url}
+\usepackage{mdframed}
+\usepackage[noend,noline]{algorithm2e}
+\usepackage{enumerate}
+\SetEndCharOfAlgoLine{}
+\SetArgSty{}
+\SetKwBlock{Repeat}{repeat}{}
+
+\everymath=\expandafter{\the\everymath\displaystyle}
+%%\usepackage{psfig}
+\DeclareMathSizes{24}{24}{24}{24}
+\newcommand{\lecture}[2]{
+  \noindent
+  \begin{center}
+  \framebox{
+    \vbox{
+      \hbox to 5.78in { {\bf CS7140: Advanced Machine Learning} \hfill Spring 2025}
+      \vspace{4mm}
+      \hbox to 5.78in { {\Large \hfill #1  \hfill} }
+      \vspace{2mm}
+      \hbox to 5.78in { {\em Instructor: Ryan Zhang  \hfill Due: #2} }
+    }
+  }
+  \end{center}
+  \vspace*{4mm}
+}
+%\newcommand{\dim}{\textup{dim}}
+
+
+\newcommand*{\diffdchar}{d}    % or {ⅆ}, or {\mathrm{d}}, or whatever standard you’d like to adhere to
+\newcommand*{\dd}{\mathop{\diffdchar\!}}
+
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{observation}[theorem]{Observation}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{fact}[theorem]{Fact}
+\newtheorem{assumption}[theorem]{Assumption}
+
+% 1-inch margins, from fullpage.sty by H.Partl, Version 2, Dec. 15, 1988.
+\topmargin 0pt
+\advance \topmargin by -\headheight
+\advance \topmargin by -\headsep
+\textheight 8.9in
+\oddsidemargin 0pt
+\evensidemargin \oddsidemargin
+\marginparwidth 0.5in
+\textwidth 6.5in
+
+\parindent 0in
+\parskip 1.5ex
+%\renewcommand{\baselinestretch}{1.25}
+
+\newcommand{\E}{\mathbb{E}}
+
+
+
+
+
+\usepackage{amsmath, amssymb}
+\usepackage{fullpage}
+\pagestyle{empty}
+\def\pp{\par\noindent}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\renewcommand{\baselinestretch}{1.2}
+\newcommand{\problem}[1]{ \bigskip \pp \textbf{Problem #1}\par}
+\newcommand{\solution}{\textit{Solution:}\par}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\bbZ}    {\mathbb{Z}}
+\newcommand{\bbQ}    {\mathbb{Q}}
+\newcommand{\bbN}    {\mathbb{N}}
+\newcommand{\bbB}    {\mathbb{B}}
+\newcommand{\bbR}    {\mathbb{R}}
+\newcommand{\bbC}    {\mathbb{C}}
+\newcommand{\calP}   {{\cal{P}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+\lecture{Problem Set 1}{\textbf{Feb 5, 2025, 11:59pm}}
+
+\textbf{Policy:} We encourage discussions and collaborations on homework. You should write up the solution independently and remember to mention any fellow students you collaborated with. There are up to three late days for all the problem sets and project submissions.
+After that, the grade depreciates by 20\% for every extra day.
+Late submissions are treated on a case by case basis. Please reach out to the instructor at \texttt{ho.zhang@northeastern.edu} to discuss.
+All homework submissions are subject to the Northeastern University Honor Code.
+
+\textbf{Submission:} We will use Canvas and Gradescope for the homework submissions. Please submit your written solutions to Gradescope.
+Login to Gradescope through Canvas using your northeastern.edu account.
+For code submission, please print out the code file and attach it to the PDF solution file.
+We strongly recommend that you write up your solution in LaTeX, although you are allowed to use Google Doc.
+
+\textbf{Length of submissions:} Include as much of the calculations needed to understand the answer. After solving the problem, try to identify the main steps taken and critical points of proof and include them as a rule of thumb.
+
+\newpage
+\paragraph{Problem 1 (30 points)}
+
+
+
+\paragraph{Problem 2 (20 points)}
+Suppose $X$ and $Y$ are independent sub-Gaussian random variables with parameters $\sigma_x^2$ and $\sigma_y^2$. Show the following properties of sub-Gaussianity.
+\begin{itemize}
+    \item (10 points)  Scalar: Show that for any $c > 0$, $cX$ is sub-Gaussian with parameter $c^2\sigma_x^2$.
+
+    \item (10 points)  Sum: Show that the sum of $X$ and $Y$ is sub-Gaussian with parameter $\sigma_x^2 + \sigma_y^2$.
+\end{itemize}
+
+\vspace{0.5in}
+\paragraph{Problem 3 (30 points)}
+For a random variable $X$, recall that the moment generating function (MGF) of $X$ is defined as $M_X(t) = \mathbb{E}[e^{tX}]$.
+In this problem, we consider the MGF of several commonly encountered distributions.
+\begin{itemize}
+    \item (10 points) Let $X\sim{\rm Poisson}(\lambda)$ be a Poission random variable with expectation $\lambda$. Show that the MGF of $X$ is $e^{\lambda(e^t - 1)}$. Recall that the probability density function of $X$ is $\frac{\lambda^k e^{-\lambda}}{k!}$ for any non-negative integer $k\in \mathbb{N}$.
+
+    \item (10 points)  Let $X\sim{\rm  Bernoulli}(p)$ be a Bernoulli random variable that is equal to one with probability $p$ and zero otherwise. Show that the MGF of $X$ is $1 - p + e^t p$.
+
+    \item (10 points)  Let $X$ is a continuous uniform distribution on the interval $[a,b]$. Show that the MGF of $X$ is $\frac{e^{tb} - e^{ta}}{t(b - a)}$ for $t \neq 0$.
+\end{itemize}
+
+
+
+\end{document}
