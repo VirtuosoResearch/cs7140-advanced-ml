@@ -406,11 +406,11 @@ Notice that \[ \hat L'(h) - \hat L(h) = \sum_{i=1}^n (\ell(h(x'_i), y'_i) - \ell
 is symmetric around zero.
 Hence, multiplying each individual term by $\sigma_i$ does not change its distribution.
 Thus,
-\begin{align*}
-    \ex{G_n} &\le \exarg{Z_{1:n}, Z'_{1:n}}{\sup_{h \in \cH} (\hat L'(h) - \hat L(h))} \\
-    &= \exarg{Z_{1:n}, Z'_{1:n}, \sigma_{1:n}}{\sup_{h\in \cH} \sigma_i (\ell(h(x'_i), y'_i) - \ell(h(x_i), y_i))} \\
-    &\le 2 \exarg{Z_{1:n}, \sigma_{1:n}}{\sup_{h\in\cH}\frac 1 n \sum_{i=1}^n \sigma_i \ell(h(x_i), y_i)}
-\end{align*}
+\begin{align}
+    \ex{G_n} &\le \exarg{Z_{1:n}, Z'_{1:n}}{\sup_{h \in \cH} (\hat L'(h) - \hat L(h))} \notag \\
+    &= \exarg{Z_{1:n}, Z'_{1:n}, \sigma_{1:n}}{\sup_{h\in \cH} \frac 1 n \sum_{i=1}^n \sigma_i (\ell(h(x'_i), y'_i) - \ell(h(x_i), y_i))} \notag \\
+    &\le 2 \exarg{Z_{1:n}, \sigma_{1:n}}{\sup_{h\in\cH}\frac 1 n \sum_{i=1}^n \sigma_i \ell(h(x_i), y_i)} \label{eq_Rn_rad}
+\end{align}
 The last line (without the factor of $2$) is the \hl{Rademacher complexity} of $\cH$.
 
 In summary, let $\cH$ be a hypothesis class consisting of a class of real-valued functions. Example: two-layer neural nets, linear models.
@@ -439,7 +439,7 @@ To be clear, recall that $\hat h_{\erm}$ is the empirical risk minimizer (ERM), 
 In more detail, recall that $G_n = \sup_{h\in\cH} L(h) - \hat L(h)$.
 Our first claim is to show that $G_n$ is close to $\ex{G_n}$:
 \begin{align}
-    \Pr\left[ G_n \ge \ex{G_n} + \epsilon \right] \le \exp(-2n\epsilon^2)
+    \Pr\left[ G_n \ge \ex{G_n} + \epsilon \right] \le \exp(-2n\epsilon^2) \label{eq_gn_dev}
 \end{align}
 This shows that $G_n$ is indeed close to its expectation plus a small error. Hence it suffices to upper bound its expectation.
 
@@ -479,8 +479,111 @@ One useful property is that taking the convex of $\cH$ preserves the Rademacher 
 Proof: Notice that the supreme over the convex hull must be attained at a vertex of the convex hull.
 This property is quite useful if we want to calculate the Rademacher complexity of a polytope. Though it is an infinite set, it suffices to examine the vertices of the polytope. We'll use this property when we examine the $\ell_1$-regularization.
 
-\subsubsection{Wrapping up the proof of \eqref{eq_rade_bound} (Lecture 5)}
+\subsubsection{Wrapping up the proof of \eqref{eq_rade_bound} (Lecture 6)}
 
+Recall that \eqref{eq_gn_dev} that we'd like to show $G_n$ and its expectation $\ex{G_n}$ are close to each other.
+In order to complete this result, we'll use a tool called McDiarmid’s inequality.
+
+\paragraph{McDiarmid’s inequality:} the bounded differences inequality
+\begin{itemize}
+    \item Let $f$ be a function satisfying the following bounded differences condition for all $i = 1, 2, \dots, n$ and all $x_1, x_2, \dots, x_n$, and any $x'_i$:
+    \[ \bigabs{ f(x_1, x_2, \dots, x_n) - f(x_1, \dots, x_{i-1}, x'_i, x_{i+1}, \dots, x_n) } \le c_i \]
+    In other words, modifying one coordinate does not change the function value too much.
+
+    \item Let $X_1, X_2, \dots, X_n$ be independent random variables. Then
+    \begin{align}\label{eq_mcdiarmid} \Pr\left[ \bigabs{f(X_1, X_2, \dots, X_n) - \ex{f(X_1, X_2, \dots, X_n)}} \ge \epsilon \right] \le \exp \left( - \frac {2 \epsilon^2} {\sum_{i=1}^n c_i^2} \right) \end{align}
+\end{itemize}
+
+\paragraph{Remark:} McDiarmid’s inequality generalizes Hoeffding’s inequality.
+Let the function $f(x_1, x_2, \dots, x_n) = \frac 1 n \sum_{i=1}^n x_i$ be the empirical mean.
+Suppose every $x_i$ and $x'_i$ are bounded from above by one.
+Then, changing $x_i$ to $x'_i$ changes the function value by at most $\frac 2 n$, leading to $c_i = \frac 2 n$ for all $i = 1, 2, \dots, n$.
+Hence, the sum of $c_i^2$ is equal to $\frac 4 {n}$.
+Plugging this to \eqref{eq_mcdiarmid} recovers the Hoeffding's inequality.
+
+This result is quite powerful, since it holds for any independent random variables, and $f$ can be complex (say a neural net).
+As long as this function is not too sensitive to perturbations in one coordinate, we get good concentration.
+
+\paragraph{Proof of McDiarmid’s inequality:}
+Recall the definition of a Martingale sequence
+\begin{itemize}
+    \item A sequence of $Z_0, Z_1, \dots, Z_n$ is a martingale sequence with respect to another sequence of random variables $X_1, X_2, \dots, X_n$ if and only if $Z_i$ only depends on $X_{1:i}$ and $\ex{Z_i | X_{1:i-1}} = Z_{i-1}$
+
+    \item For a Martingale sequence, we have the concentration because of Azuma-Hoeffding’s inequality: Suppose $Z_{1:t}$ is a martingale sequence such that $\ex{Z_i | Z_{< i}} = 0$ and $\ex{Z_i} \le R$. Then with probability at least $1 - \delta$,
+    \begin{align}\label{eq_azuma}
+        \sum_{i = 1}^t Z_i \le R \sqrt{2t \log(\delta^{-1})}
+    \end{align}
+    For reference, see chapter 12.4 of \citet{mitzenmacher2017probability}.
+\end{itemize}
+We’re going to construct a sequence
+\begin{align}
+    Z_i = \ex{f(X_1, X_2, \dots, X_n) \mid X_{1:i}}
+\end{align}
+Let’s check the following properties
+\begin{itemize}
+    \item Clearly, $Z_i$ only depends on the values of $X_{1:i}$, but not of the remaining sequence
+
+    \item Besides,
+    \[ \ex{Z_i \mid X_{1:i-1}} = \ex{\ex{f(X_1, X_2, \dots, X_n) \mid X_{1:i}} \mid X_{1:i-1}} = Z_{i-1} \]
+
+    \item Note that for $i = 0$, \[ Z_0 = \ex{f(X_1, X_2, \dots, X_n)} \]
+
+    \item For $i = n$, \[ Z_n = \ex{f(X_1, \dots, X_n) \mid X_{1:n}} = f(X_1, \dots, X_n) \]
+\end{itemize}
+Using these notations, we’d like to bound the following
+\[ \Pr[Z_n - Z_0 \ge \epsilon] \]
+Let $D_i = Z_i - Z_{i-1}$. Clearly, $Z_n - Z_0 = \sum_{i=1}^n D_i$.
+We’re going to show that $\abs{D_i}$ is bounded by $c_i$.
+Therefore, using Azuma-Hoeffding’s inequality, we can get an exponentially decreasing tail bound for $Z_n - Z_0$.
+We write down both $Z_i$ and $Z_{i-1}$ as follows:
+\begin{align*}
+    Z_{i-1} &= \ex{f(X_1, \dots, X_n) \mid X_{1:i-1}} \\
+    Z_i &= \ex{f(X_1, \dots, X_n) \mid X_{1:i}}
+\end{align*}
+The key difference is whether we condition on $X_i$ or not above.
+Imagine the set of possible realizations of $X_i$.
+We’ll consider the maximum and minimum achieving realizations
+\begin{align*}
+    L_i &= \inf_{x} \ex{f(X_1, \dots, X_{i-1}, X_i = x, \dots, X_n) \mid X_{1:i-1}, X_i = x} - Z_{i-1} \\
+    U_i &= \sup_{x} \ex{f(X_1, \dots, X_{i-1}, X_i = x, \dots, X_n) \mid X_{1:i-1}, X_i = x} - Z_{i-1}
+\end{align*}
+Clearly, $D_i$ is somewhere between $L_i$ and $U_i$.
+Suppose $L_i$ is achieved by $X_i = x_L$ and $U_i$ is achieved by $X_i = x_U$.
+
+By the bounded difference assumption, for any fixed values $X_{1:n}$ except $X_i$ (being $x_L$ or $x_U$), they are at most $c_i$ apart.
+Taking expectation over $X_{1:i-1}$ and note that they are independent of $X_i$ (key!), we have that
+\begin{align*} U_i - L_i &= \ex{ f(X_1, \dots, X_{i-1}, X_i = x_U, \dots, X_n) - f(X_1, \dots, X_{i-1}, X_i = x_L, \dots, X_n) \mid X_{1:i-1}} \\
+&\le c_i
+\end{align*}
+Thus, we have verified that the sequence $D_1, D_2, \dots, D_n$ is bounded.
+In addition, we can check that they are a Martingale sequence based on the properties listed above.
+
+Having checked through McDiarmid's inequality, it remains to show that $G_n$ satisfies the bounded difference condition.
+Recall that $G_n = \sup_{h\in \cH} L(h) - \hat L(h)$.
+This quantity naturally arises as we derive a uniform convergence claim.
+Recall that $\hat L$ is the empirical risk.
+Consider changing $Z_i$ to $Z'_i$ in $G_n$, we’d like to bound the difference
+\begin{align*}
+    \bigabs{ (\sup_{h\in\cH} L(h) - \hat L(h) ) - ( \sup_{h\in\cH} L(h ) - \hat L(h) + \frac 1 n ( \ell(Z_i, h) - \ell(Z'_i, h) ) } \le \frac 1 n
+\end{align*}
+This is because the loss values are within $0$ and $1$.
+Taking supreme cannot increase the difference.
+
+In summary, we now put all the pieces together to complete the proof of \eqref{eq_rade_bound}.
+\begin{itemize}
+
+    \item We’d like to show that, for $\epsilon = 4R_n(\cH) + \sqrt{\frac {2\log(2\delta^{-1})} n}$,
+        \[ \Pr[L(\hat h_{\erm}) - L(h^{\star}) \ge \epsilon ] \le \sup_{h\in\cH} \bigabs{L(h) - \hat L(h)} \ge \frac {\epsilon} 2 \le \delta \] 
+
+    \item The latter reduces to showing that
+        \[ \Pr[\sup_{h \in \cH} \ge \frac {\epsilon} 2] \le \Pr[G_n \ge \frac {\epsilon} 2 ] + \Pr[G'_n \ge \frac {\epsilon} 2]  \] 
+
+    \item By the steps above, we have
+        \[ Pr[G_n \ge \frac{\epsilon} 2 ] \le \exp\left( -2n (\frac {\epsilon} 2 - \ex{G_n})^2 \right) \le \exp\left(-2n (\frac {\epsilon} 2 - 2R_n(\cH)) \right)  = \frac {\delta} 2 \]
+    This is because by \eqref{eq_Rn_rad}, $\ex{G_n} \le 2 R_n(\cH)$. 
+
+    \item A similar proof applies to show that $\Pr[G'_n \ge \frac {\epsilon} 2] \le \frac {\delta} 2$
+\end{itemize}
 
 
 \subsection{Examples of Rademacher complexity (Lecture 5)}
@@ -643,6 +746,13 @@ Proof sketch:
     Thus, $\min_{h\in\cH} \tilde L_{\gamma} \le \min_{h\in\cH} \min_{h\in\cH} L_{\gamma}$,
     and $L_0(\hat h_{\erm}) \le \tilde L_{\gamma}(\hat h_{\erm})$.
 \end{itemize}
+
+\subsection{Matrix completion (Lecture 6)}
+
+Suppose you are asked to build a recommendation system. This system is to predict the review rating of a movie. 
+Related examples: Book reviews on Amazon and music recommendations on YouTube.
+
+\paragraph{Rank-constrained minimization:}
 
 \paragraph{Next lecture:} wrap up the proof of Rademacher complexity-based generalization bounds.
 Apply it to matrix completion and two-layer neural networks. {\bf Suggested readings:} Chapter 3.9, 3.12 of \cite{liang2016cs229t}.
