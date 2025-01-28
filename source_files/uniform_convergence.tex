@@ -574,19 +574,18 @@ Taking supreme cannot increase the difference.
 
 In summary, we now put all the pieces together to complete the proof of \eqref{eq_rade_bound}.
 \begin{itemize}
-
-    \item We’d like to show that, for $\epsilon = 4R_n(\cH) + \sqrt{\frac {2\log(2\delta^{-1})} n}$,
+    \item We’d like to show that, for $\epsilon = 4R_n(\cA) + \sqrt{\frac {2\log(2\delta^{-1})} n}$,
         \[ \Pr[L(\hat h_{\erm}) - L(h^{\star}) \ge \epsilon ] \le \Pr\left[ \sup_{h\in\cH} \bigabs{L(h) - \hat L(h)} \ge \frac {\epsilon} 2\right] \le \delta \] 
 
     \item The latter reduces to showing that
         \[ \Pr\left[\sup_{h \in \cH} \bigabs{L(h) - \hat L(h)} \ge \frac {\epsilon} 2\right] \le \Pr[G_n \ge \frac {\epsilon} 2 ] + \Pr[G'_n \ge \frac {\epsilon} 2]  \]
 
     \item By the steps above, we have
-        \begin{align*} 
+        \begin{align*}
             \Pr[G_n \ge \frac{\epsilon} 2 ] &\le \Pr\left[G_n - \ex{G_n} \ge \sqrt{\frac {\log(2\delta^{-1})} {2n}}\right]\\
-            &\le \exp\left( -2n (\frac {\log(2\delta^{-1})} {2n})\right) = \frac {\delta} 2 
+            &\le \exp\left( -2n \left(\frac {\log(2\delta^{-1})} {2n}\right)\right) = \frac {\delta} 2
         \end{align*}
-    The first line is because by \eqref{eq_Rn_rad}, $\ex{G_n} \le 2 R_n(\cH)$. 
+    The first line is because by \eqref{eq_Rn_rad}, $\ex{G_n} \le 2 R_n(\cA)$.
 
     \item A similar proof applies to show that $\Pr[G'_n \ge \frac {\epsilon} 2] \le \frac {\delta} 2$
 \end{itemize}
@@ -639,7 +638,7 @@ Therefore, we now get that
 \[ \ex{\exp(t \cdot W_f) \mid Z_{1:n}} \le \exp\left(\frac{t \cdot M^2} {2n}\right) \]
 We can now conclude that
 \[ \exp(t \hat R_n(f)) \le \bigabs{\cH} \exp\left( \frac{t M^2} {2n} \right) \]
-Taking log on both sides and divide by $t$, we get:
+Taking log on both sides and dividing by $t$, we get:
 \[ \hat R_n(\cH) \le \frac{\log(\bigabs{\cH})} t + \frac{ t M^2} {2n} \]
 By setting $t$ to minimize the right-hand side above, we conclude that $\hat R_n(\cH) \le \sqrt{\frac {2\log(\bigabs{\cH}) M^2} {n}}$.
 
@@ -759,7 +758,7 @@ Suppose you are asked to build a recommendation system. This system is used to p
 Related examples: Book reviews on Amazon and music recommendations on YouTube.
 
 \paragraph{Rank-constrained minimization:}
-Given an input array $X$, find $Z$ as close to $X$ as possible on the observed entries, while subject a (low) rank constraint:
+Given an input array $X$, find $Z$ as close to $X$ as possible on the observed entries, while subject to a (low) rank constraint:
 \begin{align*}
     \min_{X} &~~ \sum_{(i, j) \in \Omega}  (X_{i, j} - Z_{i, j})^2 \\
     \mbox{s.t.} &~~~~ \text{rank}(X) = r
@@ -829,7 +828,7 @@ Hence, the above is equal to
     &\le \ex{\sup_{X\in\cH} \frac 1 m \bignorms{\Sigma} \cdot \bignormnuc{X - M}} \\
     &\le \frac {2C} {m} \ex{\bignorms{\Sigma}}
 \end{align*}
-Above we use this fact and both $X, M$ have nuclear norm bounded above by $C$.
+Above we use the fact that both $X, M$ have nuclear norm bounded above by $C$.
 Hence, to finish the proof, we are left to deal with the expectation of $\bignorms{\Sigma}$.
 Here we'll use the claim that
 \[ \ex{\bignorms{\Sigma}} \le \sqrt{ \frac {m \log d} {d}} \]
