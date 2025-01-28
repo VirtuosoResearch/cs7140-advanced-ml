@@ -552,9 +552,12 @@ Suppose $L_i$ is achieved by $X_i = x_L$ and $U_i$ is achieved by $X_i = x_U$.
 
 By the bounded difference assumption, for any fixed values $X_{1:n}$ except $X_i$ (being $x_L$ or $x_U$), they are at most $c_i$ apart.
 Taking expectation over $X_{1:i-1}$ and note that they are independent of $X_i$ (key!), we have that
-\begin{align*} U_i - L_i &= \ex{ f(X_1, \dots, X_{i-1}, X_i = x_U, \dots, X_n) - f(X_1, \dots, X_{i-1}, X_i = x_L, \dots, X_n) \mid X_{1:i-1}} \\
-&\le c_i
+\begin{align*} 
+\bigabs{U_i} &= \bigabs{\ex{ f(X_1, \dots, X_{i-1}, X_i = x_U, \dots, X_n) - f(X_1, \dots, X_{i-1}, X_i, \dots, X_n) \mid X_{1:i-1}}}\\
+&\le c_i,
 \end{align*}
+by the bounded difference condition on $X_i$.
+And similarly, $\abs{L_i} \le c_i$.
 Thus, we have verified that the sequence $D_1, D_2, \dots, D_n$ is bounded.
 In addition, we can check that they are a Martingale sequence based on the properties listed above.
 
@@ -564,7 +567,7 @@ This quantity naturally arises as we derive a uniform convergence claim.
 Recall that $\hat L$ is the empirical risk.
 Consider changing $Z_i$ to $Z'_i$ in $G_n$, we’d like to bound the difference
 \begin{align*}
-    \bigabs{ (\sup_{h\in\cH} L(h) - \hat L(h) ) - ( \sup_{h\in\cH} L(h ) - \hat L(h) + \frac 1 n ( \ell(Z_i, h) - \ell(Z'_i, h) ) } \le \frac 1 n
+    \bigabs{ \left(\sup_{h\in\cH} L(h) - \hat L(h) \right) - \left( \sup_{h\in\cH} \left( L(h ) - \hat L(h) + \frac 1 n ( \ell(Z_i, h) - \ell(Z'_i, h) ) \right) \right) } \le \frac 1 n
 \end{align*}
 This is because the loss values are within $0$ and $1$.
 Taking supreme cannot increase the difference.
@@ -573,14 +576,17 @@ In summary, we now put all the pieces together to complete the proof of \eqref{e
 \begin{itemize}
 
     \item We’d like to show that, for $\epsilon = 4R_n(\cH) + \sqrt{\frac {2\log(2\delta^{-1})} n}$,
-        \[ \Pr[L(\hat h_{\erm}) - L(h^{\star}) \ge \epsilon ] \le \sup_{h\in\cH} \bigabs{L(h) - \hat L(h)} \ge \frac {\epsilon} 2 \le \delta \] 
+        \[ \Pr[L(\hat h_{\erm}) - L(h^{\star}) \ge \epsilon ] \le \Pr\left[ \sup_{h\in\cH} \bigabs{L(h) - \hat L(h)} \ge \frac {\epsilon} 2\right] \le \delta \] 
 
     \item The latter reduces to showing that
         \[ \Pr[\sup_{h \in \cH} \ge \frac {\epsilon} 2] \le \Pr[G_n \ge \frac {\epsilon} 2 ] + \Pr[G'_n \ge \frac {\epsilon} 2]  \] 
 
     \item By the steps above, we have
-        \[ Pr[G_n \ge \frac{\epsilon} 2 ] \le \exp\left( -2n (\frac {\epsilon} 2 - \ex{G_n})^2 \right) \le \exp\left(-2n (\frac {\epsilon} 2 - 2R_n(\cH)) \right)  = \frac {\delta} 2 \]
-    This is because by \eqref{eq_Rn_rad}, $\ex{G_n} \le 2 R_n(\cH)$. 
+        \begin{align*} 
+            \Pr[G_n \ge \frac{\epsilon} 2 ] &\le \Pr\left[G_n - \ex{G_n} \ge \sqrt{\frac {\log(2\delta^{-1})} {2n}}\right]\\
+            &\le \exp\left( -2n (\frac {\log(2\delta^{-1})} {2n})\right) = \frac {\delta} 2 
+        \end{align*}
+    The first line is because by \eqref{eq_Rn_rad}, $\ex{G_n} \le 2 R_n(\cH)$. 
 
     \item A similar proof applies to show that $\Pr[G'_n \ge \frac {\epsilon} 2] \le \frac {\delta} 2$
 \end{itemize}
@@ -769,7 +775,7 @@ Instead, solve the following, which is convex in $Z$:
 \end{align*}
 
 \paragraph{Low-rank factorization:} An alternative way to formulate the above is by writing it as a convex optimization problem:
-\[ \min \sum_{(i, j) \in \Omega} (X_{i, j} - Z_{i, j})^2 + \lambda \bignorm{Z}_{\star} \]
+\[ \min \sum_{(i, j) \in \Omega} (X_{i, j} - Z_{i, j})^2 + \lambda \bignorm{X}_{\star} \]
 This is a semi-definite program (SDP), which is convex in $Z$.
 Instead, we may consider the re-parametrized optimization problem:
 \[ \min \sum_{(i, j) \in \Omega} (U_i^{\top} V_j - Z_{i, j})^2, \]
