@@ -329,14 +329,14 @@ The difference is that we now get a slower convergence rate ($n^{-1}$ to $n^{-1/
 Notice that the second term is at most zero.
 Thus, we focus on the first and the third terms.
 \begin{itemize}
-    \item Use the Hoeffding’s inequality to deal with the third term.
+    \item Use Hoeffding’s inequality to deal with the third term.
     
     \item Apply uniform convergence to upper bound the first term by $\sup_{h\in\cH} \abs{L(h) - \hat L(h)}$ (Use the union bound).
 \end{itemize}
 
 \underline{Step 1:} bound $\Pr[L(h) - \hat L(h) \ge \epsilon]$ for a fixed $h \in \cH$.
 For a fixed $h \in \cH$, notice that $\hat L(h)$ is the averaged loss among $n$ IID samples.
-Each of the loss term is bounded between zero and one (with expectation equal to $L(h)$).
+Each of the loss terms is bounded between zero and one (with expectation equal to $L(h)$).
 Therefore, by Hoeffding's inequality,
 \[ \Pr\left[ \abs{L(h) - \hat L(h)} \ge \epsilon\right] \le 2\exp(-2n\epsilon^2) \]
 
@@ -349,7 +349,7 @@ By setting $\epsilon = \sqrt{\frac {2(\log\abs{\cH} + \log(2\delta^{-1}))} n }$,
 It makes sense that learning is faster when there is no noise.
 
 
-\subsection{Rademacher complexity I (Lecture 4)}
+\subsection{Rademacher complexity (Lecture 4)}
 
 Both of our generalization bounds require finite hypothesis classes. What about infinite hypothesis classes?
 
@@ -758,26 +758,27 @@ Suppose you are asked to build a recommendation system. This system is used to p
 Related examples: Book reviews on Amazon and music recommendations on YouTube.
 
 \paragraph{Rank-constrained minimization:}
-Given an input array $X$, find $Z$ as close to $X$ as possible on the observed entries, while subject to a (low) rank constraint:
+Given an input array $M$, find $X$ as close to $M$ as possible on the observed entries, while subject to a (low) rank constraint:
 \begin{align*}
-    \min_{X} &~~ \sum_{(i, j) \in \Omega}  (X_{i, j} - Z_{i, j})^2 \\
+    \min_{X} &~~ \sum_{(i, j) \in \Omega}  (X_{i, j} - M_{i, j})^2 \\
     \mbox{s.t.} &~~~~ \text{rank}(X) = r
 \end{align*}
 
 \paragraph{Nuclear norm relaxation:} The rank constraint makes the problem non-convex, search space increases at a combinatorial rate (although good algorithms exist).
-Instead, we could relax the rank constraint into a nuclear norm constraint: given a matrix $Z$, let $\bignorm{Z}_{\star} = \sum_{j} \lambda_j(Z)$---the sum of the singular values of $Z$.
-One could show that $\bignorm{Z}_{\star}$ is convex in $Z$; this is called the ``nuclear'' norm of $Z$.
-Instead, solve the following, which is convex in $Z$:
+Instead, we could relax the rank constraint into a nuclear norm constraint: given a matrix $X$, let $\bignorm{X}_{\star} = \sum_{j} \lambda_j(X)$---the sum of all the singular values of $X$.
+One could show that $\bignorm{X}_{\star}$ is convex in $X$; this is called the ``nuclear'' norm of $X$.\footnote{See \url{https://en.wikipedia.org/wiki/Matrix_norm}}
+Instead, solve the following, which is convex in $X$:
 \begin{align*}
-    \min_{X} &~~ \sum_{(i, j) \in \Omega} (X_{i, j} - Z_{i, j})^2 \\
-    \mbox{s.t.} &~~~ \bignorm{X}_{\star} \le r
+    \min_{X} &~~ \sum_{(i, j) \in \Omega} (X_{i, j} - M_{i, j})^2 \\
+    \mbox{s.t.} &~~~ \bignorm{X}_{\star} \le d r,
 \end{align*}
+where we may replace $dr$ with another parameter as needed.
 
 \paragraph{Low-rank factorization:} An alternative way to formulate the above is by writing it as a convex optimization problem:
-\[ \min \sum_{(i, j) \in \Omega} (X_{i, j} - Z_{i, j})^2 + \lambda \bignorm{X}_{\star} \]
-This is a semi-definite program (SDP), which is convex in $Z$.
+\[ \min \sum_{(i, j) \in \Omega} (X_{i, j} - M_{i, j})^2 + \lambda \bignorm{X}_{\star} \]
+This is a semi-definite program (SDP), which is convex in $X$.
 Instead, we may consider the re-parametrized optimization problem:
-\[ \min \sum_{(i, j) \in \Omega} (U_i^{\top} V_j - Z_{i, j})^2, \]
+\[ \min_{U, V} \sum_{(i, j) \in \Omega} (U_i^{\top} V_j - M_{i, j})^2, \]
 where $U_i, V_j$ are both $r$-dimensional vectors, for any $i, j$.
 Put together, $U = [U_1, U_2, \dots, U_{d_1}]$, $V = [V_1, V_2, \dots, V_{d_2}]$ are both rank-$r$ matrices.
 
@@ -866,7 +867,7 @@ Furthermore, the absolute value can be divided into two parts. Hence, the above 
 \[ 2B' \cdot \sqrt m \cdot \ex{ \sup_{\bignorm{u} \le B} { \frac 1 n \sum_{i=1}^n \sigma_i u^{\top} x_i} } \]
 To finish the proof, we invoke our Rademacher complexity bound for $\ell_2$-norm bounded linear predictors, to get that the above is at most $2B' B \sqrt{m / n}$.
 
-Provided with the Rademacher complexity of two-layer neural nets, we can get a generalization bound for neural networks, adding an extra factor of $\sqrt{log(\delta^{-1})/n}$.
+Provided with the Rademacher complexity of two-layer neural nets, we can get a generalization bound for neural networks, adding an extra factor of $\sqrt{\log(\delta^{-1})/n}$.
 
 \paragraph{Second result:} The first result scales with $\sqrt m$ -- number of hidden units.
 Hence, the result gets worse when we over-parametrize with more hidden units.
@@ -874,8 +875,14 @@ Empirically, researchers have observed that generalization error can improve as 
 Here's the result from training a two-layer neural net on MNIST \citep{neyshabur2017exploring}.
 \begin{figure}
     \centering
-    \includegraphics[width=0.35\linewidth]{source_files/figures/mnist.png}\hfill
-    \includegraphics[width=0.35\linewidth]{source_files/figures/pathnorm.png}    
+    \begin{minipage}{0.45\linewidth}
+        \centering
+        \includegraphics[width=0.75\linewidth]{source_files/figures/mnist.png}    
+    \end{minipage}\hfill
+    \begin{minipage}{0.45\linewidth}
+        \centering
+        \includegraphics[width=0.75\linewidth]{source_files/figures/pathnorm.png}
+    \end{minipage}
     \caption{Vary the number of neurons $m$ in a two-layer neural net. Path norm scales nicely with the test error.}
     \label{fig:enter-label}
 \end{figure}
@@ -883,6 +890,7 @@ Here's the result from training a two-layer neural net on MNIST \citep{neyshabur
 We’ll a generalization bound that does not depend on the number of hidden units $m$ using the path norm $P(w, U) = \sum_{i=1}^m \abs{w_i} \cdot \bignorm{u_i}$, where $u_i$ is the $i$-th row of $U$.
 Let $\cH = \set{f_{\Phi} \mid P(w, U) \le B}$. Then, the Rademacher complexity of $\cH$ is bounded as follows
 \[ R_n(\cH) \le B \sqrt{\frac 1 n} \]
+
 Remarks: The second result implies the first result. To see this, we use the Cauchy-Schwartz inequality:
 \[ P(w, U) = \sum_{i=1}^m \abs{w_i} \cdot \bignorm{u_i} \le \sqrt{\sum_{i=1}^m w_i^2} \cdot \sqrt{\sum_{i=1}^m \bignorm{u_i}^2} \le B' \cdot B \cdot \sqrt m \]
 
