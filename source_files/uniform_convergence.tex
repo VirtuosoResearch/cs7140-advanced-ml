@@ -748,8 +748,8 @@ Proof sketch:
     \item Using Rademacher complexity applied to $\tilde L_{\gamma}$, we get the relation between $\tilde L_{\gamma}(\hat h_{\erm})$ and $\min_{h\in\cH}\tilde L_{\gamma}(h)$
 
     \item Notice that $\phi_0 \le \tilde \phi_{\gamma} \le \phi_{\gamma}$.
-    Thus, $\min_{h\in\cH} \tilde L_{\gamma} \le \min_{h\in\cH} \min_{h\in\cH} L_{\gamma}$,
-    and $L_0(\hat h_{\erm}) \le \tilde L_{\gamma}(\hat h_{\erm})$.
+    Thus, \[\min_{h\in\cH} \tilde L_{\gamma} \le \min_{h\in\cH} L_{\gamma},
+    \text{ and }~~ L_0(\hat h_{\erm}) \le \tilde L_{\gamma}(\hat h_{\erm}). \]
 \end{itemize}
 
 \subsection{Matrix completion (Lecture 6)}
@@ -812,7 +812,9 @@ Here we're going to use the following result.
 Suppose $\cH$ is a set of matrices whose nuclear norm is bounded by $C$:
 \[ \cH = \set{X\in\real^{d_1\times d_2} \mid \bignormnuc{X} \le C} \]
 Then, the Rademacher complexity of nuclear norm bounded matrices is at most
-\begin{align} R_n(\cH) = \exarg{\Omega}{ \sup_{X\in\cH} \frac 1 m \sum_{ (i, j) \in \Omega } \sigma_{i, j} \bigabs{ X_{i, j} - M_{i, j} } } \le 2 C \sqrt{\frac {\log d} {m d}} \label{eq_nuc_norm_rad}\end{align}
+\begin{align}
+    R_n(\cH) = \exarg{\Omega}{ \sup_{X\in\cH} \frac 1 m \sum_{ (i, j) \in \Omega } \sigma_{i, j} \bigabs{ X_{i, j} - M_{i, j} } } \le 2 C \sqrt{\frac {\log d} {m d}} \label{eq_nuc_norm_rad}
+\end{align}
 Recall our result from \eqref{eq_rade_bound}, if $m \ge d  r^2 \log (d\delta^{-1}) / \epsilon^2$, then the above Rademacher complexity is at most $\epsilon$.
 Therefore, based on \eqref{eq_rade_bound}, we could say that with probability at least $1 - \delta$, the recovery error of the minimizer must be at most $O(\epsilon)$.
 
@@ -836,6 +838,67 @@ Showing this result requires using some facts related to the spectrum of random 
 In summary, we have thus shown that
 \[ R_n(\cH) \le 2C \sqrt{\frac {\log(d)} {m d}} \]
 
-\paragraph{Next lecture:} use Rademacher complexity to study two-layer neural networks.
-{\bf Suggested readings:} Chapter 3.8 of \cite{liang2016cs229t}, Chapter 11 of \cite{zhang2023mathematical}.
+\subsection{Two-layer neural networks (Lecture 7)}
 
+Setup: Consider a two-layer ReLU neural net with $m$ hidden units.
+Let $\Phi = (w \in \real^m, U\in \real^{m\times d})$ denote the parameters for the first and second layers, respectively.
+
+Given an input vector $x\in\real^d$, let
+\[ f_{\Phi}(x) = w^{\top} \phi(Ux) \in \real, \]
+denote the output of the network, where $\phi(\cdot)$ is the activation function that is $1$-Lipschitz continuous.
+Let us assume the training set $\set{x_i}_{i=1}^n \subseteq \real^d$ lies in some bounded $\ell_2$-norm ball.
+
+\paragraph{First result:} Let $\cH=\set{ f_{\Phi} \mid \bignorm{w} \le B', \bignorms{U} \le B }$. Then the Rademacher complexity of $\cH$ is bounded by \[ R_n(\cH) \le 2B B' \sqrt{\frac {m} {n}} \]
+Imagine we use a two-layer neural network to classify MNIST digits. If we use a network with $m$ neurons. This result says that the Rademacher complexity scales with the operator norm of the first layer weights and the second layer weights.
+
+\paragraph{Proof:} Use composition property of Rademacher complexity and result for $\ell_2$-norm bounded linear predictors; Let’s first write the Rademacher complexity
+\begin{align*}
+    R_n(\cH) = \exarg{\sigma_{1:n}}{ \sup_{\Phi\in\cH} \frac 1 n \sum_{i=1}^n \sigma_i w^{\top} \phi(Ux) }
+\end{align*}
+Let’s first deal with the supremum over the second layer weight $w$ by setting its direction to be the same as the other vector
+\[ R_n(\cH) \le B' \cdot \exarg{\sigma_{1:n}} { \sup_{\Phi\in\cH} \bignorms{\frac 1 n \sum_{i=1}^n \sigma_i \phi(Ux_i) } } \]
+Next, because there are $m$ neurons. Hence (by Cauchy-Schwartz inequality), we reduce the above to less than
+\[ B' \cdot \sqrt m \cdot \ex{ \sup_{\bignorm{u} \le B} \bigabs{ \frac 1 n \sum_{i=1}^n \sigma_i \phi(u^{\top} x_i)} } \]
+The trick here is that since the operator norm of the first layer weight $U$ is bounded by $B$, the norm of every row of $U$ (or neuron) is also bounded by $B$.
+It remains to deal with the above.
+Here, we can use our composition property: $\phi$ is $1$-Lipschitz continuous.
+Furthermore, the absolute value can be divided into two parts. Hence, the above is at most
+\[ 2B' \cdot \sqrt m \cdot \ex{ \sup_{\bignorm{u} \le B} { \frac 1 n \sum_{i=1}^n \sigma_i u^{\top} x_i} } \]
+To finish the proof, we invoke our Rademacher complexity bound for $\ell_2$-norm bounded linear predictors, to get that the above is at most $2B' B \sqrt{m / n}$.
+
+Provided with the Rademacher complexity of two-layer neural nets, we can get a generalization bound for neural networks, adding an extra factor of $\sqrt{log(\delta^{-1})/n}$.
+
+\paragraph{Second result:} The first result scales with $\sqrt m$ -- number of hidden units.
+Hence, the result gets worse when we over-parametrize with more hidden units.
+Empirically, researchers have observed that generalization error can improve as number of hidden units increases.
+Here's the result from training a two-layer neural net on MNIST \citep{neyshabur2017exploring}.
+\begin{figure}
+    \centering
+    \includegraphics[width=0.35\linewidth]{source_files/figures/mnist.png}\hfill
+    \includegraphics[width=0.35\linewidth]{source_files/figures/pathnorm.png}    
+    \caption{Vary the number of neurons $m$ in a two-layer neural net. Path norm scales nicely with the test error.}
+    \label{fig:enter-label}
+\end{figure}
+
+We’ll a generalization bound that does not depend on the number of hidden units $m$ using the path norm $P(w, U) = \sum_{i=1}^m \abs{w_i} \cdot \bignorm{u_i}$, where $u_i$ is the $i$-th row of $U$.
+Let $\cH = \set{f_{\Phi} \mid P(w, U) \le B}$. Then, the Rademacher complexity of $\cH$ is bounded as follows
+\[ R_n(\cH) \le B \sqrt{\frac 1 n} \]
+Remarks: The second result implies the first result. To see this, we use the Cauchy-Schwartz inequality:
+\[ P(w, U) = \sum_{i=1}^m \abs{w_i} \cdot \bignorm{u_i} \le \sqrt{\sum_{i=1}^m w_i^2} \cdot \sqrt{\sum_{i=1}^m \bignorm{u_i}^2} \le B' \cdot B \cdot \sqrt m \]
+
+Technically speaking, the path norm still scales with the number of hidden units.
+However, as we saw from the previous slide, some neurons turn out to be quite small in the experiments, resulting in a small path norm even as $m$ increases!
+
+\paragraph{Proof:} Let’s first write the Rademacher complexity.
+Recall that $u_i$ is the $i$-th row of $U$. We expand out the Rademacher complexity using
+\[ w^{\top} \phi(Ux_i) = \sum_{j=1}^m w_j \phi(u_j^{\top} x_i) \]
+Let $\bar u_j = u_j / \bignorm{u_j}$. Because ReLU activation is $1$-Homogeneous, meaning that $\phi(c x) = c \phi(x)$, hence
+\[ w^{\top} \phi(Ux_i) = \sum_{j=1}^m w_j \bignorm{u_j} \phi\big(\bar u_j^{\top} x_i\big) \]
+We apply this expansion to the Rademacher complexity
+\[ R_n(\cH) = \ex{\sup_{\Phi} \frac 1 n \sum_{i=1}^n \sigma_i \left(\sum_{j=1}^m w_j \bignorm{u_j} \phi(\bar u_j^{\top} x_i)\right) } \]
+Taking the supremum over $\Phi$ means that we’ll maximize the path norm above!
+Hence, after switching the order of the sum, we can get
+\[ R_n(\cH) \le B \cdot \ex{\max_{1\le j\le m} \bigabs{\frac 1 n \sum_{i=1}^n \sigma_i \phi(\bar u_j^{\top} x_i)}} \le 2B \sqrt{\frac 1 n} \]
+
+\paragraph{Next lecture:} VC dimension and covering methods.
+{\bf Suggested readings:} Chapter 3.11, 3.13 of \cite{liang2016cs229t}.
