@@ -1,0 +1,159 @@
+\section{Generalization of neural networks and deep learning}
+
+In the previous section, we saw the concept of uniform convergence, and showed that with this concept, we can get pretty strong results on a variety of problems, including $\ell_2$/$\ell_1$-regularized linear functions, matrix completion, and two-layer neural networks.
+However, it turns out that moving beyond these settings with the techniques we've developed is quite challenging.
+A couple of key challenges are:
+\begin{itemize}
+    \item In terms of the sample/learning complexity, how could we go beyond two layers? How does this complexity depend on the data distribution?
+
+    \item How could we incorporate the inductive bias induced by the choice of specific optimization algorithms into the learning complexity?
+\end{itemize}
+The goal of this section is to tackle the above questions.
+In particular, we shall begin by establishing the folklore intuition that the learning complexity of an ML model scales with its number of parameters.
+This kind of folklore is especially intriguing in the context of deep networks, as these models have millions (and now billions) of parameters.
+However, this high complexity clearly doesn't explain/corroborate with the empirical results we typically see with model fine-tuning (now prompt tuning).
+
+\subsection{The concept of shattering and VC dimension (Lecture 8)}
+
+\paragraph{Motivation about shattering:}
+Imagine we want to bound the complexity of a set of half-spaces passing through the origin:
+\[ F = \set{z \rightarrow \mathbbm{1}_{w^{\top} z \ge 0} \mid w \in \real^d} \]
+For example, think of $w$ as a linear predictor in the case of binary classification problems.
+Question: What should the complexity of $F$ be?
+
+Notice that this function class depends on $d$ parameters.
+For example, there are $2^d$ possible output vectors for a given input.
+However, while $F$ is an infinite set, it only has finitely many possible behaviors on a given set of $n$ samples $x_1, x_2, \dots, x_n$.
+
+\paragraph{Example:} Consider two points in two dimensions:
+$z_1 = [3, 0], z_2 = [-3, 0]$.
+Recall the class of half-spaces passing through the origin can be written down as
+\[ \cF = \set{z \rightarrow \mathbbm{1}_{w^{\top}z \ge 0} \mid w \in \real^2} \]
+For this example, the second coordinate of $w$ does not matter.
+Hence, the number of possible outputs here is only $2$, i.e., $[1, 0], [-1, 0]$ (instead of $4$).
+In particular, this implies that the empirical Rademacher complexity of $\set{z_1, z_2}$ is the same as $\set{[1, 0], [-1, 0]}$ (since we essentially just take the sup over this output set).
+
+More generally, for two function classes $\cF$ and $\cF'$, if
+\[ \set{[f(z_1), f(z_2), \dots, f(z_n)] \mid f\in \cF} = \set{[f'(z_1), f'(z_2), \dots, f'(z_n)] \mid f' \in \cF'} \]
+Then, $\hat R_n(\cF) = \hat R_n(\cF')$.
+In other words, what matters is the output behavior of the function on the $n$ samples.
+This observation is useful when we analyze Boolean functions (i.e., those that return either $0$ or $1$), an important example being the loss function class $\cA = \set{z \rightarrow \ell(z, h) \mid h \in \cH}$ where $\ell$ is the zero-one loss.
+This observation regarding the output behavior of $\cF$ is captured by the shattering coefficient.
+
+\paragraph{Definition of shattering:}
+Let $\cF$ be a family of functions that map a dataset $Z$ to a finite set (such as $\set{0, 1}$).
+The shattering coefficient of $\cF$ is the maximum number of behaviors observed on $n$ samples:
+\[ s(\cF, n) = \max_{\set{z_1, z_2, \dots, z_n} \subseteq Z} \bigabs{\set{[f(z_1), f(z_2), \dots, f(z_n)] \mid f\in \cF}} \]
+We can use Massart's finite lemma (see \eqref{eq_emp_massart}) to bound the empirical Rademacher complexity using the shattering coefficient.
+In particular, suppose $\cF$ involves a set of Boolean functions, then clearly the second moment of any such function on $n$ inputs is at most $1$:
+\[ \sup_{f\in\cF} \frac 1 n \sum_{i=1}^n (f(z_i))^2 \le 1 \]
+Hence, by setting $M = 1$ in \eqref{eq_emp_massart}, we get that the empirical Rademacher complexity of $\cF$ is at most
+\[ \hat R_n(\cF) \le \sqrt{\frac {2\log(s(\cF, n))} n} \]
+In essence, we have reduced the complexity of learning a possibly infinite class of functions down to a finite number (i.e., the shattering).
+
+As a remark, in the case of zero-one loss, the shattering coefficient $s(\cF, n)$ is at most $2^n$.
+Hence, the empirical Rademacher complexity is at most $\sqrt{\frac {2 \log(2^n)} n} = \sqrt 2$.
+Therefore, to get meaningful results, we would like the above quantity to go to zero instead, as $n$ goes to infinity.
+
+\paragraph{Example (threshold functions):}
+Consider $n$ real values placed on a line.
+We claim that the function class $\cF = \set{z \rightarrow \mathbbm{1}_{z \ge t} \mid t \in \real}$ has shattering coefficient $s(\cF,n) = n+1$.
+
+To see this, we notice that on $n$ real-valued inputs, all of the possible outputs are: $[0, 0, \dots, 0], [1, 0, \dots, 0], [1, 1, \dots, 0], \dots, [1, 1, \dots, 1]$, which has $n + 1$ different outcomes in total.
+
+Now we are ready to define the concept of VC dimension.
+
+\paragraph{Definition of VC dimension:} The VC dimension of a family of functions $\cH$ with Boolean outputs is the maximum number of samples that can be \hl{shattered by} $\cH$.
+In other words,
+\[ VC(\cH) = \sup_{n} \mathbbm{1}[s(\cH, n) = 2^n] \]
+Thus, the VC dimension of $\cH$ captures the maximum number of samples whose output behaviors can always be realized using some function $h \in \cH$.
+
+\paragraph{Example (intervals):}
+Let $\cH = \set{z \rightarrow \mathbbm{1}[z\in [a, b]] \mid a, b \in \real}$.
+We can verify that $s(\cH, 1) = 2$ (fix this point and vary $a, b$), and $s(\cH, 2) = 2$ (fix two different points and vary $a, b$ to achieve all four outcomes).
+However, $s(\cH, 3) = 7 < 2^3$---because after fixing the three points, no matter how we set $a, b$, we cannot leave out the middle point.
+In other words, we cannot realize the outcome $[1, 0, 1]$.
+As a result, the VC dimension of $\cH$ is equal to $2$.
+
+\paragraph{Example (VC dimension of finite-dimensional function classes):}
+Let $\cF$ be a real-valued function class.
+Let $\cH = \set{x \rightarrow \mathbbm{1}[f(x) \ge 0] \mid f\in \cF}$ be the set of binary classifiers defined by $\cF$.
+Then we have that
+\[ VC(\cH) \le dim(\cF) \]
+where the dimension of $\cF$ refers to the number of basis elements in $\cF$.
+For example, if $\cF = \set{x \rightarrow w^{\top} x \mid w\in\real^d}$, then $dim(\cF) = d$.
+This result thus connects the algebraic dimension of $\cF$ with the combinatorial dimension of $\cH$.
+
+\paragraph{Proof:} Take any $n$ samples $x_1, x_2, \dots, x_n$ with $n > dim(\cF)$.
+We show that these $n$ points cannot be completely shattered by $\cH$.
+In other words, we'd like to find some direction that $\cF$ does not cover.
+To achieve this, consider the linear map $M(f) = [f(x_1), f(x_2), \dots, f(x_n)] \in \real^n$ that takes a function $f\in \cF$ and outputs a vector on the $n$ samples.
+
+By definition, the dimension of $\set{M(f) \mid f\in\cF}$ is at most $dim(\cF)$.
+Since $n > dim(\cF)$, there must exist a nonzero vector $c\in\real^n$ such that $\inner{c}{M(f)} = 0$ for all $f\in\cF$.
+In particular, let us assume without loss of generality that there exists an entry of $c$ that is negative.
+Otherwise, we could just consider $-c$ with the same argument (since $c$ is nonzero).
+
+Thus, for all functions $f \in \cF$, we have that
+\[ \sum_{i = 1}^n c_i f(x_i) = 0 \]
+In particular, we now separate the sum into two buckets depending on whether $c_i$ is positive or negative, and re-write the above as
+\[ \sum_{i: c_i \ge 0} c_i f(x_i) + \sum_{i: c_i < 0} c_i f(x_i) = 0 \]
+Now suppose that the VC dimension of $\cH$ is greater than or equal to the dimension of $\cF$.
+Then, for any zero one labeling of $x_1, x_2, \dots, x_n$, that is $y_1, y_2, \dots, y_n$, there must exist some function $f \in \cF$ such that
+\[ h = [x_i \rightarrow \mathbbm{1}[f(x_i) \ge 0] = y_i] \in \cH \]
+Based on these premises, we now derive a contradiction, which will imply that the $n$ samples cannot be shattered by $\cF$.
+This will imply that the VC dimension of $\cH$ should be at most $dim(\cF)$.
+
+To derive this contradiction, let us consider a function $h$ such that:
+$h(x_i) = 1$ (hence $f(x_i) \ge 0$) whenever $c_i \ge 0$;
+$h(x_i) = 0$ (hence $f(x_i) < 0$) whenever $c_i < 0$.
+For such an $h$, the weighted sum of $c_i f(x_i)$ must be strictly positive. This is a contradiction!
+
+\paragraph{Remark:} by invoking the set of linear half spaces through the origin, we can achieve the above dimension $d$.
+For this case, we shall construct some set of $d$ points that can be shattered by $\cF$, and the set of $d$ basis vectors will do.
+In particular, let us create $d$ samples corresponding to the basis vectors as
+\begin{align*}
+    z_1 = [1, 0, \dots, 0] \\
+    z_2 = [0, 1, \dots, 0] \\
+    \cdots \\
+    z_d = [0, 0, \dots, 1]
+\end{align*}
+We'd like to show that for any binary vector $y \in \set{0, 1}^d$, we can find a linear predictor $w \in \real^d$ such that
+\begin{align*}
+    \mathbbm{1}[w^{\top} z_1 \ge 0] = y_1 \\
+    \mathbbm{1}[w^{\top} z_2 \ge 0] = y_2 \\
+    \cdots \\
+    \mathbbm{1}{w^{\top} z_n \ge 0} = y_n
+\end{align*}
+We construct the linear predictor $w$ as follows.
+Let $I \subseteq \set{1, 2, \dots, d}$ be the set of indices on which $y \in \set{0, 1}^d$ has value $1$.
+We then set $w_i = 1$ for any $i \in I$ and set $w_i = -1$ for any $i \notin I$.
+Now, we can verify that the above conditions all hold.
+This implies that the VC dimension of these linear half spaces in dimension $d$ must be at least $d$.
+In conclusion, the VC dimension is equal to $d$.
+
+
+\paragraph{Connecting shattering to Rademacher complexity:}
+For a function class $\cH$ whose VC dimension is at most $d$, its shattering coefficient is at most the following
+\begin{align} s(\cH, n) \le \sum_{i=0}^d \binom{n}{i} \le \begin{cases}
+2^n & \text{ if } n \le d\\
+\big(\frac{en}{d}\big)^d & \text{ if } n > d
+\end{cases} \label{eq_sauer}
+\end{align}
+Now, imagine the case that $n > d$.
+Using this result we shall have that
+\[ \log (s(\cA, n)) = \log (s(\cH, n)) \le d(\log (n) + 1 - \log (d)), \]
+where $\cA$ is the loss function class of $\cH$.
+Thus, we now have a result that bounds the empirical Rademacher complexity of $\cA$ using the VC dimension of $\cH$ as follows:
+\begin{align} \hat R_n(\cA) \le \sqrt{ \frac {2 \log(s(\cF, n))} n } \le \sqrt{\frac {2d(\log(n) + 1 - \log(d))} n} \le \sqrt{\frac {2 VC(\cH) \ln(en)} {n}} \label{eq_rn} \end{align}
+By plugging this result into \eqref{eq_rade_bound}, we thus got a learning bound that only depends on the VC dimension of the hypothesis class $\cH$ and the number of samples $n$.
+
+The proof of \eqref{eq_sauer} is skipped and can be found in Section 3.11, \cite{liang2016cs229t}.
+
+\paragraph{VC dimension of deep neural networks:}
+It has been shown that for a network with $W$ weight parameters and $L$ number of layers, the VC dimension of such classes of neural networks with ReLU activation (or piecewise linear activation) function is at most $O(W L \log(W))$ \citep{bartlett2019nearly}.
+Therefore, we could now combine this result with \eqref{eq_rn}---together, we now have the folklore statement that the learning complexity of a deep neural network scales with the number of parameters of the network!
+
+
+\paragraph{Next lecture:} Neural tangent kernels.
+{\bf Suggested readings:} Chapter 3.11 of \cite{liang2016cs229t}.
