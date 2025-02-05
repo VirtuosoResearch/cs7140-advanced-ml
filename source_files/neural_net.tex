@@ -154,6 +154,168 @@ The proof of \eqref{eq_sauer} is skipped and can be found in Section 3.11, \cite
 It has been shown that for a network with $W$ weight parameters and $L$ number of layers, the VC dimension of such classes of neural networks with ReLU activation (or piecewise linear activation) function is at most $O(W L \log(W))$ \citep{bartlett2019nearly}.
 Therefore, we could now combine this result with \eqref{eq_rn}---together, we now have the folklore statement that the learning complexity of a deep neural network scales with the number of parameters of the network!
 
+\subsection{Analyzing over-parameterized neural networks using neural tangent kernels (Lecture 9)}
 
-\paragraph{Next lecture:} Neural tangent kernels.
-{\bf Suggested readings:} Chapter 3.11 of \cite{liang2016cs229t}.
+\subsubsection{Basics of kernel methods}
+The performance of a machine learning model breaks down into two parts:
+\begin{align*}
+    L(\hat f) - \inf_f L(f) = \underbrace{L(\hat f) - \inf_{f\in F} L(f)}_{\text{Estimation error}} + \underbrace{\inf_{f\in F} L(f) - \inf_{f} L(f)}_{\text{Approximation error}}
+\end{align*}
+Both optimization and generalization results aim to reduce estimation error.
+Approximation error results, on the other hand, relate to the expressivity of a function class.
+
+\paragraph{Example (linear models and kernel features):}
+For linear methods (i.e., $f_w(x) = w^{\top} x$ for some parameter $w\in\real^d$ and input feature vector $x\in\real^d$), the estimation error is small, but the approximation error is large.
+
+Kernel methods represent one way to move beyond linear methods.
+In kernel methods, we replace $\inner{x}{w}$ with $\inner{\phi(x)}{w}$, where $\phi(x)$ is an arbitrary feature map of $x$.
+Then, we may use the kernel features in a regression model.
+Suppose we are minimizing the mean squared error using a kernel method:
+\[ \ell(w) = \frac 1 {2n} \sum_{i=1}^n (\inner{\phi(x_i)}{w} - y_i)^2  \]
+
+\paragraph{Definition of kernels:} A function $k: \cX \times \cX \rightarrow \real$ is a positive semi-definite kernel if and only if for every subset of inputs $\set{x_1, x_2, \dots, x_n} \subseteq \cX$, the matrix $K\in\real^{n\times n}$ defined by using the kernel map
+\[ K_{i, j} = k(x_i, x_j), \text{ for every } 1 \le i, j \le n \]
+is a positive semi-definite matrix.\footnote{Recall that a symmetric matrix $K$ is positive semi-definite if for every $x$, $x^{\top} K x \ge 0$.}
+
+\paragraph{Examples (kernels):}
+\begin{itemize}
+    \item Linear kernels: $k(x, x') = \inner{x}{x'}$. This follows from the fact that $K = XX^{\top}$ is positive semi-definite.
+
+    \item Gaussian kernels: $k(x, x') = \exp\left( - \frac {\bignorm{x - x'}^2} {2\sigma^2} \right)$.
+    This is followed by the fact that either the sum or the product of two kernels (the element-wise product (Hadamard product) of two PSD matrices is still PSD) is still a kernel.
+
+    \item Polynomial kernels: $k(x, x') = (1 + \inner{x}{x'})^p$. 
+\end{itemize}
+
+\paragraph{Exercise:} verify that both the polynomial kernel and the Gaussian kernel are indeed kernels
+
+\paragraph{Alternative definitions of kernels through feature maps:}
+Recall that a feature map $\phi$ maps an input $x$ to a feature embedding $\phi(x)$.
+Consider the kernel $k: \cX \times \cX \rightarrow \real$ defined by
+\[ k(x, x') = \inner{\phi(x)} {\phi(x')} \]
+This must be a kernel.
+To show this, we will follow the definition of a kernel by taking a vector $\alpha$ and let
+\[ \alpha^{\top} K \alpha = \sum_{i=1}^n \sum_{j=1}^n \alpha_i \alpha_j \inner{\phi(x_i)}{\phi(x_j)} = {A}^{\top} {A}, \]
+where $A = \sum_{i=1}^n \alpha_i \phi(x_i)$.
+
+
+\subsubsection{Motivation for introducing the neural tangent kernels}
+
+It has been widely observed that gradient-based optimization algorithms often converge to small training errors on a complex neural network model.
+A widely believed explanation for this surprising phenomenon is that the neural net is over-parametrized.
+The neural tangent kernel represents one of the earliest attempts to mathematically formulate the theory of over-parameterized neural networks.
+The neural tangent kernel arises from the dynamics of the predictions applied to the training data.
+
+\paragraph{Problem setup:} Given a training dataset $\set{(x_i, y_i)}_{i = 1}^n$, where $x_i \in\real^d$ and $y_i \in\real$, let $w\in\real^N$ represent the parameters of a neural network.
+Let $f_w(x)$ denote the output of the network.
+We shall restrict our attention to the mean squared loss (for solving regression problems)
+\[ \ell(w) = \frac 1 2 \sum_{i=1}^n (f_w(x_i) - y_i)^2 \]
+For the purpose of illustration, let us consider the gradient flow update.
+Let $w(t)$ denote the iterate configuration at time $t \ge 0$.
+Then, $w(t)$ evolves according to
+\[ \frac {d w(t)} {d t} = -\nabla \ell(w(t)) \]
+
+\paragraph{Learning dynamics:} We now show that the dynamics are characterized by a positive semi-definite matrix $H(t) \in \real^{n \times n}$, defined as
+\begin{align} H_{i, j}(t) = \biginner {\frac {\partial f_{w(t)}(x_i)} {\partial w_i}} {\frac {\partial f_{w(t)}(x_j)} {\partial w_j}} \label{eq_ht}
+\end{align}
+Then, let the network outputs at time $t$ be defined as
+\[ u(t) = [ f_{w(t)}(x_1), f_{w(t)}(x_2), \dots, f_{w(t)}(x_n) ], \]
+for any $t \ge 0$.
+Finally, let $y = [y_1, y_2, \dots, y_n]$.
+Then, we will show that the network outputs will follow the dynamics as
+\[ \frac {d u(t)} {dt} = - H(t) ( u(t) - y ) \]
+
+\paragraph{Proof:} Recall that the evolution of the network parameters follows an update as
+\[ \frac {d w(t)} {d t} = -\nabla \ell(w(t)) = - \sum_{i=1}^n ( f_{w(t)}(x_i) - y_i ) \frac {d f_{w(t)}(x_i)} {d w} \]
+Using chain rule and multi-variate calculus, the evolution of the network output satisfies
+\[ \frac {d f_{w(t)}(x_i)} { d t } = \biginner {\frac {d f_{w(t)}(x_i)} {d w}} {\frac {d w(t)} {dt}} \]
+By applying the first step to the second step, we get
+\begin{align*} 
+    \frac {d f_{w(t)}(x_i)} {d t} 
+    &= \biginner{ \frac {d f_{w(t)}(x_i)} {dw} } {- \sum_{j=1}^n (f_{w(t)}(x_j) - y_j) \frac {d f_{w(t)}(x_j)} {d w}} \\
+    &= - \sum_{j=1}^n (f_{w(t)}(x_j) - y_j) \underbrace{\biginner{ \frac {d f_{w(t)}(x_i)} {d w} } {\frac {d f_{w(t)} (x_j)} {d w}} }_{\text{$i, j$-th entry of the $H(t)$ matrix}} \\
+    &= - H(t) (u(t) - y)
+\end{align*}
+
+In summary, the learning dynamics are captured by a symmetric matrix $H(t)$.
+Now, how does the NTK arise?
+We will define an ultra-wide neural net whose width goes to infinity.
+In the limit, it can be shown that the matrix $H(0)$ remains constant during training, i.e., equal to $H(0)$.
+Moreover, under a random initialization of parameters, $H(0)$ converges to a deterministic kernel matrix $H^{\star}$ --- the Neural Tangent Kernel (NTK).
+
+\subsubsection{Defining the neural tangent kernel}
+
+\paragraph{Two-layer neural networks:}
+Consider the mapping
+\begin{align} x \rightarrow \sum_{i=1}^m a_i \sigma(w_i^{\top} x), \label{eq_twolayer} \end{align}
+where $\sigma$ represents a nonlinear activation function (such as ReLU or sigmoid).
+Now consider the mapping rescaled by $\frac 1 {\sqrt m}$:
+\[ x \rightarrow \frac 1 {\sqrt m} \sum_{i=1}^m a_i \sigma(w_i^{\top} x) \]
+We shall linearize the right-hand side around the initialization $w_i(0)$, for all $i = 1, 2, \dots, m$;
+Essentially, performing Taylor's expansion to derive the following
+\begin{align*} 
+    x &\rightarrow \frac 1 {\sqrt m} \sum_{i=1}^m a_i \left( \sigma( (w_i(0))^{\top} x ) + (w_i - w_i(0))^{\top} x \sigma'( w_i(0)^{\top} x ) \right) \\
+    & = \frac 1 {\sqrt m } \sum_{i=1}^m a_i \left( \sigma( (w_i(0))^{\top} x ) - (w_i(0))^{\top} x \sigma'( (w_i(0))^{\top} x )  \right) + \frac 1 {\sqrt m} x^{\top} \left(\sum_{i=1}^m a_i w_i \sigma'( (w_i(0))^{\top} x ) \right)
+\end{align*}
+
+\paragraph{Defining the ultra-wide kernel:}
+Recall that the dynamics of predictions is governed by $H(t) \in \real^{n \times n}$ (see \eqref{eq_ht}).
+Recall that $f$ is given in \eqref{eq_twolayer}.
+Therefore, the $i, j$-th entry of the kernel matrix $H(t)$ is
+\[ H_{i, j}(0) = x_i^{\top} x_j \sum_{r = 1}^m \biginner{\frac {a_r \sigma'((w_r(0)^{\top} x_i) )} {\sqrt m}} { \frac {a_r \sigma'( (w_r(0))^{\top} x_j )} {\sqrt m} }  \]
+
+Suppose we sample every $w_r(0)$ from a standard Gaussian distribution.
+In addition, suppose we sample $a_r$ uniformly between $\set{+1, -1}$.
+Then, one can view the above as the average of $m$ independent random variables.
+When $m$ becomes very large, then by the law of large numbers, the average is close to its expectation.
+This gives rise to the Neural Tangent Kernel evaluated at $x_, x_j$ as follows:
+\[ H^{\star}_{i, j} = x_i^{\top} x_j \exarg{ w \sim \cN(0, \id)  } { \sigma'(w^{\top} x_i) \sigma'(w^{\top} x_j) } \]
+
+\subsubsection{Convergence analysis}
+
+Based on the NTK defined above, we now show that the neural network stays close to initialization long enough to get a small loss value.
+There are essentially two steps here:
+\begin{itemize}
+    \item Step 1: For a sufficiently wide network, the randomly initialized neural net is close to the expectation -- the NTK
+    
+    \item Step 2: For a sufficiently wide network, the kernel matrix at time $t$ remains close to the initialization
+\end{itemize}
+
+\paragraph{$H(0)$ is close to $H^{\star}$ for sufficiently large $m$:}
+Suppose the activation function (e.g., ReLU) is $1$-Lipschitz continuous.
+Suppose for every input $x_i$, the Euclidean norm of $x_i$ is less than $1$, for any $i = 1, 2, \dots, n$.
+For any $\epsilon > 0$, if $m \ge O(n^2 \log(\delta^{-1}) / \epsilon^2)$ (recall $n$ is the number of samples at the input), then with probability at least $1 - \delta$, we have that
+\[ \bignormFro{H(0) - H^{\star}} \le \epsilon \]
+
+To show that this is true, we will first show that every entry of $H(0)$ is close to $H^{\star}$ with probability $1 - O(\delta / n^2)$.
+First, we can see that every individual entry of $H(0)$ is bounded from above by $1$:
+\[ \bigabs{x_i^{\top} x_j \cdot \sigma'( (w_r(0))^{\top} x_i ) \sigma'( (w_r(0) )^{\top} x_j )} \le 1 \]
+Now we shall apply Hoeffding's inequality (see \eqref{eq_hoeff}), and set the deviation as $\epsilon / n$.
+Then, the failure probability becomes
+\[ 2\exp\left( - \frac{2\epsilon^2 m} {n^2} \right) \]
+When $m \ge O(\frac {n^2 \log(n\delta^{-1})} {\epsilon^2})$, the above probability can be reduced below $O(\delta / n^2)$.
+By taking a union bound over all the entries of $H(0)$, we have that the above will hold with probability $1 - \delta$.
+
+Finally, we convert the entry-wise error bound to the operator norm bound:
+\begin{align*}
+    %\bignorms{H(0) - H^{\star}}
+    %\le
+    \bignormFro{H(0) - H^{\star}}
+    \le \sqrt{n^2 \cdot \frac {\epsilon^2} {n^2}} = \epsilon
+\end{align*}
+
+\paragraph{$H(t)$ remains close to $H^{\star}$:}
+Suppose that $y_i = O(1)$ for all $i = 1, 2, \dots, n$.
+Let $t > 0$, suppose that for all $0 < s < t$, $u_i(s) = O(1)$ for all $i = 1, 2, \dots, n$.
+Then if $m \ge O(\frac {n^6 t^2 \log(n \delta^{-1})} {\epsilon^2})$, with probability $1 - \delta$,
+\[ \bignormFro{H(t) - H^{\star}} \le \epsilon \]
+There are two steps in the proof of this result:
+\begin{itemize}
+    \item We first show that every weight vector remains close to the initialization if the width is large
+
+    \item We then show that this implies the kernel matrix remains close to the NTK
+\end{itemize}
+
+\paragraph{Next lecture:} Wrapping up neural tangent kernels.
+Begin implicit regularization analysis.
+{\bf Suggested readings:} Chapter 9 of \cite{arora2020theory}.

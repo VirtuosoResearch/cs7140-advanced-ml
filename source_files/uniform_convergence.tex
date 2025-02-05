@@ -188,7 +188,7 @@ Let $Z_1, Z_2, \dots, Z_n$ be $n$ independent and identically distributed random
 
 Let $\hat\mu_n = \frac 1 n \sum_{i=1}^n Z_i$ denote the mean of the $n$ random variables.
 Then, for any $\epsilon \in (0, 1)$, we have
-\[ \Pr\left[ \bigabs{\hat\mu_n - \mu} > \epsilon \right] \le 2\exp(-2\epsilon^2 n) \]
+\begin{align} \Pr\left[ \bigabs{\hat\mu_n - \mu} > \epsilon \right] \le 2\exp(-2\epsilon^2 n) \label{eq_hoeff} \end{align}
 
 The Hoeffding's inequality is a very powerful result when we work with the average of $n$ random variables.
 Variants of this inequality (which is restricted to bounded random variables) are also called Chernoff bound.\footnote{\url{https://en.wikipedia.org/wiki/Chernoff_bound}}
