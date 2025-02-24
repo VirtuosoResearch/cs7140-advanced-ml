@@ -698,13 +698,13 @@ Notice that
     D_{KL}(\cQ || \cP) - D_{KL}(\cQ || \cP_G)
     &= \int \left( \log\left(\frac {d \cQ} {d \cP}\right) - \log\left( \frac {d\cQ} {d \cP_G} \right) \right) d \cQ \\
     &= \int \log\left( \frac {d \cP_G} {d \cP} \right) d \cQ \\
-    &= \exarg{f\sim\cQ} \log\left( \frac {\exp(\phi(f))} {\exarg{h\sim\cP}{\exp(\phi(h))}} \right) \\
-    &= \exarg{\cQ}{\phi(f)} - \log \exarg{\cP}{\exp(\phi(f))}
+    &= \exarg{f\sim\cQ}{\log\left( \frac {\exp(\phi(f))} {\exarg{h\sim\cP}{\exp(\phi(h))}} \right)} \\
+    &= \exarg{f\sim\cQ}{\phi(f)} - \log \exarg{f\sim\cP}{\exp(\phi(f))}
 \end{align*}
 Thus,
 \begin{align*}
-    \log\exarg{\cP}{\exp(\phi(f))}
-    &= \exarg{\cP}{\phi(f)} - D_{KL}(\cQ || \cP) + D_{KL}(\cQ || \cP_G) \\
+    \log\exarg{f\sim\cP}{\exp(\phi(f))}
+    &= \exarg{f\sim\cQ}{\phi(f)} - D_{KL}(\cQ || \cP) + D_{KL}(\cQ || \cP_G) \\
     &\ge \exarg{f\sim\cQ}{\phi(f)} - D_{KL}(\cQ || \cP),
 \end{align*}
 since the KL divergence is non-negative.
@@ -713,32 +713,33 @@ Notice that the inequality holds if and only if $\cQ = \cP_G$.
 Next, in order to prove McAllester's bound, we consider the function $2(n-1) (\Delta(f))^2$, where $\Delta(f) = L(f) - \hat L_n(f)$.
 This gives
 \begin{align*}
-    \exarg{\cP}{\exp(2(n-1) \Delta^2(f))}
-    \ge \exp\left( 2(n-1) \exarg{\cQ}{\Delta^2(f)} - D_{KL}(\cQ || \cP)\right)
+    \exarg{f\sim\cP}{\exp(2(n-1) \Delta^2(f))}
+    \ge \exp\left( 2(n-1) \exarg{f\sim\cQ}{(\Delta(f))^2} - D_{KL}(\cQ || \cP)\right)
 \end{align*}
-Let us take the expectation over the training samples on both sides and notice that the prior $\cP$ does not depend on the training samples.
+Let us take the expectation over the training samples $S$ (recall that $\cQ$ depends on the training samples) on both sides and notice that the prior $\cP$ does not depend on the training samples.
+We get
 \begin{align*}
-    \exarg{S}{\exarg{\cP}{\exp(2(n-1) \Delta^2(f))}}
-    \ge \exarg{S}{\exp\left( 2(n-1) \exarg{\cQ}{\Delta^2(f)} - D_{KL}(\cQ || \cP)\right)}
+    \exarg{S}{\exarg{\cP}{\exp(2(n-1) (\Delta(f))^2)}}
+    \ge \exarg{S}{\exp\left( 2(n-1) \exarg{f\sim\cQ}{(\Delta(f))^2} - D_{KL}(\cQ || \cP)\right)}
 \end{align*}
 For a fixed $f$, we can bound $\Delta(f)$ using Hoeffding:
 \[ \Pr[\abs{\Delta(f)} \ge \epsilon] \le 2\exp(-2n \epsilon^2) \]
 Therefore, we have
 \begin{align*}
-    \exarg{S}{\exp(2(n-1) \Delta^2(f))}
-    &= \int_{0}^{\infty} \Pr[\exp(2(n-1) \Delta^2(f) \ge s)] ds \\
-    &\le 1 + \int_1^{\infty} \Pr[\abs{\Delta(f)} \ge \sqrt{log(s) / (2(n-1)}] ds \\
-    &\le 1 + \int_1^{\infty} 2\exp(-2n log(s) / (2(n-1)))  ds \\
+    \exarg{S}{\exp(2(n-1) (\Delta(f))^2)}
+    &= \int_{0}^{\infty} \Pr\left[\exp\left(2(n-1) (\Delta(f))^2\right) \ge s\right] ds \\
+    &\le 1 + \int_1^{\infty} \Pr\left[\bigabs{\Delta(f)} \ge \sqrt{\frac {\log(s)} {2(n-1)}}\right] ds \\
+    &\le 1 + \int_1^{\infty} 2\exp\left(-2n \cdot \frac {\log(s)} {2(n-1)}\right)  ds \\
     & = 1 + 2(n-1) \le 2n
 \end{align*}
-Then by Markov's inequality,
+Then, by Markov's inequality,
 \begin{align*}
-    \Pr[\exp(2(n-1) \exarg{\cQ}{\Delta^2(f)} - D_{KL}(\cQ || \cP)) \ge 2n / \delta]
+    \Pr\left[\exp\left(2(n-1) \exarg{f\sim\cQ}{(\Delta(f))^2} - D_{KL}(\cQ || \cP)\right) \ge \frac {2n} {\delta}\right]
     \le \delta
 \end{align*}
 That is, with probability at least $1 - \delta$,
-\[ 2(n-1) \exarg{\cQ}{\Delta^2(f)} \le \log(2n / \delta) + D_{KL}(\cQ || \cP) \]
-Using Jensen's inequality, the left is greater than $\exarg{\cQ}{\Delta(f)}^2$.
+\[ 2(n-1) \exarg{f\sim\cQ}{(\Delta(f))^2} \le \log\left(\frac {2n} {\delta}\right) + D_{KL}(\cQ || \cP) \]
+Using Jensen's inequality, the left is greater than \[2(n-1)\left(\exarg{f\sim\cQ}{\Delta(f)}\right)^2 \]
 Taking square root on both sides gives us the McAllester's bound.
 
 \paragraph{PAC-Bayessian bound (Catoni):}
