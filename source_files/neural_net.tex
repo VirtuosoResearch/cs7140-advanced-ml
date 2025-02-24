@@ -713,13 +713,13 @@ Notice that the inequality holds if and only if $\cQ = \cP_G$.
 Next, in order to prove McAllester's bound, we consider the function $2(n-1) (\Delta(f))^2$, where $\Delta(f) = L(f) - \hat L_n(f)$.
 This gives
 \begin{align*}
-    \exarg{f\sim\cP}{\exp(2(n-1) \Delta^2(f))}
+    \exarg{f\sim\cP}{\exp\left(2(n-1) (\Delta(f))^2\right)}
     \ge \exp\left( 2(n-1) \exarg{f\sim\cQ}{(\Delta(f))^2} - D_{KL}(\cQ || \cP)\right)
 \end{align*}
 Let us take the expectation over the training samples $S$ (recall that $\cQ$ depends on the training samples) on both sides and notice that the prior $\cP$ does not depend on the training samples.
 We get
 \begin{align*}
-    \exarg{S}{\exarg{\cP}{\exp(2(n-1) (\Delta(f))^2)}}
+    \exarg{S}{\exarg{f\sim\cP}{\exp(2(n-1) (\Delta(f))^2)}}
     \ge \exarg{S}{\exp\left( 2(n-1) \exarg{f\sim\cQ}{(\Delta(f))^2} - D_{KL}(\cQ || \cP)\right)}
 \end{align*}
 For a fixed $f$, we can bound $\Delta(f)$ using Hoeffding:
