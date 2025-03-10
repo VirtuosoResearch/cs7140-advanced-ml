@@ -683,7 +683,7 @@ Let the loss function be bounded between zero and one.
 Let $\cP$ be any prior distribution over $\cH$.
 Let $\cQ$ be any posterior distribution over $\cH$, which is a function of the training data.
 Then with probability at least $1 - \delta$,
-\[ \exarg{h \sim \cQ}{L(h)} \le \exarg{h \in \cQ}{\hat L(h)} + \sqrt{\frac {KL(\cQ || \cP) + \log(4n \delta^{-1})} {2n-1}}, \]
+\[ \exarg{h \sim \cQ}{L(h)} \le \exarg{h \in \cQ}{\hat L(h)} + \sqrt{\frac {KL(\cQ || \cP) + \log(2n \delta^{-1})} {2(n-1)}}, \]
 which holds for all posterior $\cQ$.
 
 \paragraph{Proof:}
@@ -853,6 +853,3 @@ Specifically, if $\Sigma = \sigma^2\id_p$, then the above simplifies to
 
 By choosing $\sigma^2$ and $\beta$ to minimize equation \eqref{eq_intermediate}, we will obtain equation \eqref{eq_main_1}.
 This summarizes the high-level proof idea.
-
-\paragraph{Next lecture:} Start talking about statistical transfer learning.
-{\bf Suggested readings:} \cite{zhang2024noise,ju2023generalization}.
