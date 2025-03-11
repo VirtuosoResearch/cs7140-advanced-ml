@@ -201,26 +201,26 @@ Let $(\hat A, \hat B)$ denote the global minimizer of $\ell(A, B)$.
 Next, we could find the optimal $\hat A$ by taking the rank-$r$ SVD of $Y^{\top} X (X^{\top}X)^{-1} X^{\top}Y$ to get the leading $r$ left singular vectors as $U_r \in\real^{t\times r}$.
 Then, we can obtain $\hat B \hat A$ as $(X^{\top} X)^{-1} X^{\top} Y U_r U_r^{\top}$.}
 
-\paragraph{Deriving the HPS estimator:} For the optimization objective $\ell(A, B)$ in equation \eqref{eq_mtl_same_cov}, using the local optimality condition $\frac {\partial f} {\partial B} = 0$, we can obtain $\hat{B}$ as a function of $A$:
-	\begin{align}
-		\hat{B}(A) %
-		&= (X^{\top} X)^{-1} X^{\top} Y A^{\top} (AA^{\top})^{+}, \label{eq_Bhat}
-	\end{align}
+\paragraph{Deriving the HPS estimator:} For the optimization objective $\ell(A, B)$ in equation \eqref{eq_mtl_same_cov}, using the local optimality condition $\frac {\partial \ell} {\partial B} = 0$, we can obtain $\hat{B}$ as a function of $A$:
+\begin{align}
+    \hat{B}(A) %
+    &= (X^{\top} X)^{-1} X^{\top} Y A^{\top} (AA^{\top})^{+}, \label{eq_Bhat}
+\end{align}
 where $Y := [Y^{(1)}, Y^{(2)}, \dots, Y^{(t)}]$ and $(AA^{\top})^{+}$ denotes the pseudoinverse of $AA^{\top}$.
-	Plugging $\hat{B}(A)$ into equation \eqref{eq_mtl_same_cov}, we obtain the following objective that depends only on $A$ (in matrix notation):
-	\begin{align}\label{eq_mtl_output_layer}
-		g(A) = \bignormFro{X (X^{\top}X)^{-1}X^{\top} Y A^{\top} (AA^{\top})^{+} A - Y}^2.
-	\end{align}
+Plugging $\hat{B}(A)$ into equation \eqref{eq_mtl_same_cov}, we obtain the following objective that depends only on $A$ (in matrix notation):
+\begin{align}\label{eq_mtl_output_layer}
+    g(A) = \bignormFro{X (X^{\top}X)^{-1}X^{\top} Y A^{\top} (AA^{\top})^{+} A - Y}^2.
+\end{align}
 Note that $A^{\top} (AA^{\top})^{+} A$ is a projection onto the subspace spanned by the rows of $A$. For simplicity, we write it into the form
 	$$A^{\top} (AA^{\top})^{+} A= U_A U_A^\top,$$
 where $U_A \in \real^{t\times r}$ is a $t\times r$ partial orthonormal matrix (i.e. $U_A^\top U_A=\id_{r\times r}$). Hence, we also denote the function $g(A)$ by $g(U_A)$.
-    
+
 Now, to find the optimal solution for $U_A$, we write $X (X^{\top} X)^{-1} X^{\top} = P_X$ (which is an $n$ by $n$ projection matrix of rank $p$), and expand $g(A)$ as:
-    \begin{align*}
-        g(A) = \bignormFro{P_X Y U_A U_A^{\top} - Y}^2
-        &= \bignormFro{P_X Y U_A U_A^{\top}}^2 + \bignormFro{Y}^2 - 2\inner{P_X Y U_A U_A^{\top}}{Y} \\
-        & = \bignormFro{Y}^2 - \inner{P_X Y U_A U_A^{\top}}{Y} = \bignormFro{Y}^2 - \inner{U_A U_A^{\top}}{Y^{\top} P_X Y},
-    \end{align*}
+\begin{align*}
+    g(A) = \bignormFro{P_X Y U_A U_A^{\top} - Y}^2
+    &= \bignormFro{P_X Y U_A U_A^{\top}}^2 + \bignormFro{Y}^2 - 2\inner{P_X Y U_A U_A^{\top}}{Y} \\
+    & = \bignormFro{Y}^2 - \inner{P_X Y U_A U_A^{\top}}{Y} = \bignormFro{Y}^2 - \inner{U_A U_A^{\top}}{Y^{\top} P_X Y},
+\end{align*}
 where we use the fact that $P_X^2 = P_X$ since it is a projection matrix and $U_A^{\top} U_A = \id_{r\times r}$.
 Thus, to minimize $g(A)$, we just need to maximize the inner project between $Y^{\top} P_X Y$ and $U_A U_A^{\top}$---this can be achieved by finding the best rank-$r$ SVD of $Y^{\top} P_X Y$ and taking the top-$r$ singular vectors, which form the partial orthonormal matrix $U_r = U_{\hat A}$.
 Lastly, we can insert $U_r$ as $A$ back to $\hat B A$ to obtain $\hat B \hat A$ as the HPS estimators for all tasks from $1$ to $t$.
@@ -239,7 +239,7 @@ We illustrate the behavior of the HPS estimator in the multitask setting as foll
 		\caption{Varying model shift $\mu$}
 		\label{fig_sec4_transfer}
 	\end{subfigure}
-	\caption{Illustration of transfer effects in the random-effects model with multiple source tasks.
+    \caption{Illustration of transfer effects in the random-effects model with multiple source tasks.
     In particular, $\mu$ indicates the extent of model shift --- higher values of $\mu$ means greater differences between model vectors across tasks.
 	Figure \ref{fig_sec4_width} shows that for rank $r$ from $1$ to $10$, the lowest excess risk of task $t$ is achieved at $r = 1$ (averaged over three random seeds).
 %	This simulation uses $\mu = 0.05$ and is .
@@ -248,5 +248,128 @@ We illustrate the behavior of the HPS estimator in the multitask setting as foll
 	\label{fig_sec4}
 \end{figure}
 
-\paragraph{Next lecture:} Start talking about reinforcement learning.
-{\bf Suggested readings:} \cite{wu2020understanding}.
+\subsection{A brief foray into reinforcement learning}
+
+In reinforcement learning, the interactions between the agent and the environment are often described by an infinite horizon, discounted Markov decision process (MDP), specified by:
+\begin{itemize}
+    \item A state space $\cS$, which may be finite or infinite.
+    For mathematical convenience, we will assume that $\cS$ is finite or countably infinite.
+
+    \item An action space $\cA$, which may also be discrete or infinite.
+
+    \item A transition function $P: \cS \times \cA \rightarrow \Delta(\cS)$, where $\Delta(\cS)$ is the space of probability distributions over $\cS$ (i.e., the probability simplex).
+    $P(s' | s, a)$ is the probability of transitioning into state $s'$ upon taking action $a$ in state $s$.
+    We use $P_{s, a}$ to denote the vector $P(\cdot | s, a)$.
+
+    \item A reward function $r: \cS \times \cA \rightarrow [0, 1]$, where $r(s, a)$ is the immediate reward associated with taking action $a$ in state $s$.
+    More generally, $r(s, a)$ could be a random variable where the distribution depends on $s, a$.
+    %While we largely focus on the case where $r(s, a)$ is determinstic, 
+
+    \item A discount factor $\gamma \in [0, 1)$, which defines a horizon for the problem.
+
+    \item An initial state distribution $\mu \in \Delta(\cS)$, which specifies how the initial state $s_0$ is generated.
+\end{itemize}
+
+\paragraph{The objective, policies, and values.}
+In a given MDP $M = (\cS, \cA, P, r, \gamma, \mu)$, the agent interacts with the environment according to the following protocol.
+The agent starts at some state $s_0 \sim \mu$; at each time step $t = 0, 1, 2, \dots,$ the agent takes an action $a_t \in \cA$, obtains the immediate reward $r_t = r(s_t, a_t)$, and observes the next state $s_{t+1 }$ sampled according to $s_{t + 1} \sim P(\cdot | s_t, a_t)$.
+The interaction record at time $t$,
+\[ r_t = (s_0, a_0, r_0, s_1, \dots, s_t, a_t, r_t) \]
+is called a trajectory, which includes the observed state at time $t$.
+
+In the most general setting, a policy specifies a decision-making strategy in which the agent chooses actions adaptively based on the history of observations.
+Precisely, a policy is a mapping from a trajectory to an action, i.e., $\pi: \cH \rightarrow \Delta(\cA)$ where $\cH$ is the set of all possible trajectories (of all lengths) and $\Delta(\cA)$ is the space of probability distributions over $\cA$.
+
+\paragraph{Values.} We now define values for general policies.
+For a fixed policy and a starting state $s_0 = s$, we define the value function $V^{\pi}_M: \cS \rightarrow \real$ as the discounted sum of future rewards
+\[ V_M^{\pi}(s) = \ex{\sum_{t=0}^{\infty} \gamma^t r(s_t, a_t) | \pi, s_0 = s} \]
+where expectation is with respect to the randomness of the trajectory, that is, randomness in state transitions and stochasticity of $\pi$.
+
+Similarly, the action-value (or $Q$-value) function $Q_M^{\pi}: \cS \times \cA \rightarrow \real$ is defined as
+\[ Q_M^{\pi}(s, a) = \ex{\sum_{t = 0}^{\infty} \gamma^t r(s_t, a_t) | \pi, s_0 = s, a_0 = a} \]
+
+\paragraph{Goal.} Given a state $s$, the goal of the agent is to find a policy $\pi$ that maximizes t he value, i.e., the optimization problem the agent seeks to solve is:
+\[ \max_{\pi} V_M^{\pi}(s), \]
+where the max is over all possibly non-stationary and randomized policies.
+
+\paragraph{Example (Navigation).}
+Imagine the navigation of a robot or a delivery agent.
+The state of the agent is their current location.
+The four actions might be moving one step along each of east, west, north, or south. The transitions in the simplest setting are deterministic.
+Taking the north action moves the agent one step north of their location, assuming the step size is standardized.
+The agent might have a goal state $g$ they are trying to reach, and the reward is zero until the agent reaches the goal, and one upon reaching the goal state.
+Since the discount factor $\gamma < 1$, there is incentive to reach the goal state earlier in the trajectory.
+As a result, the optimal behavior in this setting corresponds to finding the shortest path from the initial state to the goal state, and the value function of a state, given a policy is $\gamma^d$, where $d$ is the number of steps required by the policy to reach the goal state.
+
+\paragraph{Conversational agent.} This is another fairly general RL problem.
+The state of an agent can be the current transcript of the conversation, along with additional information about the context of the conversation, characteristics of other agents or human in the conversation.
+Actions depend on the domain, for instance, we can think of the statement to make in the conversation.
+Conversational agents may be designed for task completion, such as travel assistant, tech support, or virtual receptionist.
+For these cases, where may be a pre-defined set of slots which the agent needs to fill before they can find a good solution.
+For instance, in the case of a travel agent, these may correspond to the dates, source, destination, and mode of travel.
+The actions may correspond to the text queries to fill the slots.
+
+For task completion, reward is defined as a binary outcome on whether the task was completed or not, such as whether the travel was successfully booked or not.
+Depending on the domain, we could further refine it based on quality or price of travel package.
+For more general conversations, the reward is whether the conversation was satisfactory to the other agents/humans or not.
+
+\paragraph{Example (Strategic games).} This is another popular use case where RL has been used to achieve human level performance in Go, Chess, Poker, etc.
+The usual setting consists of states being the current game board, actions being the potential next moves and reward being the eventual win/loss outcome on a more detailed score when it's defined in the game.
+These are also called multi-agent RL.
+
+\paragraph{Stationary policies.}
+Stationary policies satisfy the following consistency conditions.
+%\paragraph{Bellman consistency.}
+In particular, suppose that $\pi$ is a stationary policy.
+Then $V^{\pi}$ and $Q^{\pi}$ satisfy the following Bellman consistency equations for all $s\in\cS$ and $a\in\cA$,
+\begin{align*}
+    V^{\pi}(s) &= Q^{\pi}(s, \pi(s)) \\
+    Q^{\pi}(s, a) &= r(s, a) + \gamma \exarg{a\sim\pi, s'\sim P(\cdot | s, a)}{V^{\pi}(s')}
+\end{align*}
+Let us denote $P^{\pi}$ as the transition matrix on state-action pairs induced by a stationary matrix $\pi$, specifically:
+\[ P^{\pi}_{(s, a), (s', a')} \define P(s' | s, a) \pi(a' | s') \]
+In particular, for deterministic policies we have
+\begin{align*}
+    P^{\pi}_{(s, a), (s', a')} \define
+    \begin{cases}
+        P(s' | s, a) & \text{ if } a' = \pi(s') \\
+        0 & \text{ if } a' \neq \pi(s')
+    \end{cases}
+\end{align*}
+Let $V^{\pi}$ be a vector of length $\cS$ and $Q^{\pi}, r$ as vectors of length $\abs{\cS} \cdot \abs{\cA}$.
+Let $P$ be a matrix where $P_{(s, a), s'} = P(s' | s, a)$.
+With this notation, we can verify that
+\begin{align*}
+    Q^{\pi} = r + \gamma P V^{\pi}, \text{ and } Q^{\pi} = r + \gamma P^{\pi} Q^{\pi},
+\end{align*}
+leading to the solution that $Q^{\pi} = (\id - \gamma P^{\pi})^{-1} r$.
+
+A remarkable and convenient property of MDPs is that there exists a stationary and deterministic policy that simultaneously maximizes $V^{\pi}(s)$ for all $s \in \cS$.
+In particular, the Bellman optimality equations \citep{bellman1956dynamic} give a precise characterization of the optimal value function.
+
+\subsubsection{Finite-horizon Markov decision processes}
+
+In some cases, it's natural to work with finite-horizon (and time-dependent) MDPs.
+Here, a finite horizon, time-dependent MDP $M = (\cS, \cA, \set{P}_h, \set{r}_h, H, \mu)$ is specified as follows
+\begin{itemize} 
+    \item A state space $\cS$
+    \item An action space $\cA$
+    \item A time-dependent transition function $P_h: \cS \times \cA \rightarrow \Delta(S)$
+    \item A time-dependent reward function $r_h: \cS \times \cA \rightarrow [0, 1]$
+    \item An integer $H$ which defines the horizon of the problem
+    \item An initial state distribution $\mu \in \Delta(\cS)$ which specifies how the initial state $s_0$ is generated
+\end{itemize}
+Here, for a policy $\pi$, a state $s$, and $h \in \set{0, \dots, H-1}$, we define the value function $V_h^{\pi}: \cS \rightarrow \real$ as
+\[ V_h^{\pi}(s) = \ex{\sum_{t = h}^{H-1} r_h(s_t, a_t) | pi, s_h = s } \]
+Similarly, the state-action value function $Q_h^{\pi}$ is defined as
+\[ Q_h^{\pi}(s, a) = \ex{\sum_{t=h}^{H-1} r_h(s_t, a_t) | \pi, s_h = s, a} \]
+Given a state $a$, the goal of the agent is to find a policy $\pi$ that maximizes the value $\max_\pi V^{\pi}(s)$.
+
+When the MDP is known, solving the optimal policy can be achieved in polynomial time using LP optimization.
+
+\subsubsection{Multi-armed bandits}
+
+
+
+%\paragraph{Next lecture:} Start talking about reinforcement learning.
+\paragraph{Suggested readings:} Chapter 1 in \cite{agarwal2019reinforcement}.
