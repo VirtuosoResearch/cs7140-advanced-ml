@@ -367,9 +367,38 @@ Given a state $a$, the goal of the agent is to find a policy $\pi$ that maximize
 
 When the MDP is known, solving the optimal policy can be achieved in polynomial time using LP optimization.
 
-\subsubsection{Multi-armed bandits}
+\subsection{Multi-armed bandits}
 
+Above we require knowledge of the MDP. Here, we consider another decision making framework.
+For $t = 1, \dots, T$,
+\begin{itemize}
+    \item Select decision $\pi^t \in \Pi \define = \set{1, 2, \dots, A}$
+    \item Observe reward $r^t \in \real$
+\end{itemize}
+The protocol proceeds in $T$ rounds.
+At each round $t \in [T]$, the learning agent selects a discrete decision $\pi^t \in \Pi = \set{1, \dots, K}$ using historical data.
+%We allow the learner to randomize the decision at step $t$.
+Based on the decision $\pi^t$, the learner receives a random reward $r_a \in [-1, 1]$ from $R(a) \in \Delta([-1, 1])$, which has mean reward
+\[ \exarg{r_a \sim R(a)}{r_a} = \mu_a \]
+Every iteration $t$, the learner picks an arm $I_t \in [1, 2, \dots, K]$. The cumulative regret is defined as
+\[ R_T = T \cdot \max_i \mu_i - \sum_{t=0}^{T-1} \mu_{I_t} \]
+Denote $a^{\star} = \arg \min_i \mu_i$ as the optimal arm.
+Define gap $\Delta_a = \mu_{a^{\star}} - \mu_a$ for any arm $a$.
 
+The upper confidence bound algorithm is one approach to tackle the MAB problem.
+For simplicity, we allocate the first $K$ rounds to pull each arm once.
+Then, for $t = 1 \rightarrow T - K$,
+\begin{itemize}
+    \item Execute arm $I_t = \arg \max_{i \in [K]} \left( \hat \mu_i^t + \sqrt{\frac {\log(TK / \delta)} {N_i^t}} \right)$
+    \item Observe $r_t \define r_{I_t}$
+\end{itemize}
+where $I_t$ is the index of the arm that is picked by the algorithm at iteration $t$,
+and the counts of each arm at each iteration $t$ is
+\[ N_a^t = 1 + \sum_{i=1}^{t-1} \bm{1}\set{I_i = a} \]
+The upper confidence bound states that with probability at least $1 - \delta$,
+\[ \bigabs{ \hat \mu_a^t - \mu_a } \le 2 \sqrt{ \frac {\ln(TK / \delta)} {N_a^t}  } \]
+where $\hat \mu_a^t$ is the empirical mean for each arm.
+It can be shown that UCB achieves a regret of at most $O(\sqrt{K T \ln (KT / \delta)} + K)$.
 
 %\paragraph{Next lecture:} Start talking about reinforcement learning.
 \paragraph{Suggested readings:} Chapter 1 in \cite{agarwal2019reinforcement}.
